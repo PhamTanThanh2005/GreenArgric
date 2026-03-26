@@ -20,8 +20,7 @@ export const WeatherCard: React.FC = () => {
       <div className="absolute top-20 right-20 bg-white p-4 rounded-full flex items-center justify-center">
          <CloudSun size={60} className='text-brand-green'/>
       </div>
-      
-      {/* Text "Weather" lớn */}
+
       <div className="absolute bottom-2 left-6">
         <h1 className="text-white text-7xl font-extrabold tracking-tight">Weather</h1>
       </div>

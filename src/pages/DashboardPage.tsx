@@ -4,7 +4,7 @@ import { WeatherCard } from '../features/dashboard/components/WeatherCard';
 import { StatCard } from '../features/dashboard/components/StatCard';
 import { ChartCard } from '../features/dashboard/components/ChartCard';
 
-// Dữ liệu mock cho biểu đồ (mô phỏng theo hình 8)
+// Dữ liệu mock cho biểu đồ
 const chartData1 = [
   { name: 'Jan', value: 27 }, { name: 'Feb', value: 26 }, { name: 'Mar', value: 27 }, { name: 'Apr', value: 27.5 }, { name: 'May', value: 25.3 }, { name: 'Jun', value: 22.6 },
 ];
@@ -21,7 +21,6 @@ export const DashboardPage: React.FC = () => {
       <h2 className="text-2xl font-medium text-black font-playwrite">Xin chào,</h2>
       <WeatherCard />
 
-      {/* Lưới 4 thẻ thông số */}
       <div className="grid grid-cols-2 gap-6">
         <StatCard icon={ThermometerSun} label="Nhiệt độ" value="35" unit="°C" trend="up" />
         <StatCard icon={Sprout} label="Độ ẩm đất" value="70" unit="%" trend="up" />
@@ -29,7 +28,6 @@ export const DashboardPage: React.FC = () => {
         <StatCard icon={Sun} label="Ánh sáng" value="75" unit="%" trend="up" />
       </div>
 
-      {/* Lưới 4 biểu đồ */}
       <div className="grid grid-cols-2 gap-8">
         <ChartCard title="Nhiệt độ" type="area" data={chartData1} dataKeyX="name" dataKeyY="value" chartColor="#1b5e3a" />
         <ChartCard title="Độ ẩm đất" type="bar" data={chartData2} dataKeyX="name" dataKeyY="value" chartColor="#c4e3d3" />
