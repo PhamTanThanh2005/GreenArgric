@@ -1,10 +1,9 @@
 import React from 'react';
-import { useLogin } from '../hooks/useLogin'; // Import hook login mới
-import { Modal } from '../../../components/Modal/Modal'; // Import Modal dùng chung
-import { LoginForm } from './LoginForm'; // Import Form đăng nhập cụ thể
+import { useLogin } from '../hooks/useLogin';
+import { Modal } from '../../../components/Modal/Modal';
+import { LoginForm } from './LoginForm';
 
 export const LoginOptions: React.FC = () => {
-  // Lấy data và hàm từ hook mới ra dùng
   const { 
     isModalOpen, selectedRole, handleSelectRole, handleCloseModal 
   } = useLogin();
@@ -18,31 +17,29 @@ export const LoginOptions: React.FC = () => {
          </span>
       </div>
 
-      {/* HIỂN THỊ DANH SÁCH VAI TRÒ (LUÔN CỐ ĐỊNH Ở ĐÂY) */}
+      {/* HIỂN THỊ DANH SÁCH VAI TRÒ */}
       <div className="w-full space-y-4 mt-4">
         <button 
           onClick={() => handleSelectRole('Chủ vườn')}
           className="w-full py-3.5 text-base bg-white text-[#1b5e3a] border-2 border-[#1b5e3a] rounded hover:bg-[#f0fdf4] font-semibold transition-colors"
         >
           Chủ vườn / Quản lý nhà kính
-          {/* Hiển thị tiêu đề là selectedRole trong hình ảnh */}
         </button>
         <button 
           onClick={() => handleSelectRole('Quản trị viên')}
           className="w-full py-3.5 text-base bg-white text-[#1b5e3a] border-2 border-[#1b5e3a] rounded hover:bg-[#f0fdf4] font-semibold transition-colors"
         >
           Quản trị viên
-          {/* Hiển thị tiêu đề là selectedRole trong hình ảnh */}
         </button>
       </div>
 
-      {/* GỌI MODAL Ở ĐÂY (SẼ HIỂN THỊ ĐÈ LÊN TRANG CHÍNH KHI ĐƯỢC MỞ) */}
+      {/* GỌI MODAL */}
       <Modal 
         isOpen={isModalOpen} 
         onClose={handleCloseModal}
-        className="w-180" // Tùy chỉnh độ rộng cụ thể cho modal đăng nhập
+        className="w-180" 
       >
-        {/* Truyền component LoginForm cụ thể vào làm nội dung */}
+        {/* Truyền component LoginForm */}
         <LoginForm role={selectedRole} />
       </Modal>
 

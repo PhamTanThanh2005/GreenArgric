@@ -1,5 +1,4 @@
 import React from 'react';
-// Import hình ảnh của bạn vào đây (nhớ sửa lại đường dẫn cho đúng thực tế)
 import wage from "../../assets/wage.png"
 
 export const Footer: React.FC = () => {
@@ -14,13 +13,9 @@ export const Footer: React.FC = () => {
           className="w-full object-cover" 
         />
       </div>
-
-      {/* TÁCH RA LÀM 2 THẺ DIV Ở ĐÂY */}
       
-      {/* Thẻ 1 (Lớp ngoài): Trải dài full màn hình để lấp đầy màu trắng 2 bên mép */}
       <div className="relative z-10 bg-white w-full">
         
-        {/* Thẻ 2 (Lớp trong): Giới hạn chiều rộng và căn giữa nội dung */}
         <div className="max-w-7xl mx-auto pt-8 pb-12 px-8 flex justify-between items-center">
           
           <div className="max-w-3xl">

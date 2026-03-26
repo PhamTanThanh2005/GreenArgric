@@ -16,26 +16,24 @@ export const Header: React.FC = () => {
 
   return (
     <header className="bg-brand-green text-white px-14 py-2 flex items-center justify-between z-50 shadow-md">
-      {/* Logo góc trái */}
+      {/* Logo  */}
       <div className="flex items-center gap-2 cursor-pointer" onClick={() => navigate('/')}>
         <div className="w-35">
           <img src="/images/logo.png" alt="Logo" />
         </div>
       </div>
 
-      {/* Search Field ở giữa */}
+      {/* Search Field */}
       <div className="flex-1 flex justify-center px-4">
         <SearchField />
       </div>
 
-      {/* Vùng công cụ góc phải */}
       <div className="flex items-center bg-white rounded-md px-1 py-0.5 shadow-sm">
         
-        {/* RẼ NHÁNH LOGIC HIỂN THỊ */}
+        {/*  LOGIC HIỂN THỊ */}
         {isLoggedIn ? (
           // --- GIAO DIỆN KHI ĐÃ ĐĂNG NHẬP ---
           <>
-            {/* Nút Thông báo */}
             <button 
               className="p-2 text-[#1b5e3a] hover:bg-green-50 rounded-md transition-colors relative flex items-center justify-center"
               title="Thông báo"
@@ -46,7 +44,6 @@ export const Header: React.FC = () => {
 
             <div className="bg-[#1b5e3a]/20 w-[1.5px] h-5 mx-1"></div>
             
-            {/* Nút Profile */}
             <button 
               className="p-2 text-[#1b5e3a] hover:bg-green-50 rounded-md transition-colors flex items-center justify-center"
               title="Hồ sơ cá nhân"
@@ -56,7 +53,6 @@ export const Header: React.FC = () => {
 
             <div className="bg-[#1b5e3a]/20 w-[1.5px] h-5 mx-1"></div>
 
-            {/* Nút Đăng xuất */}
             <button 
               className="px-4 py-2 text-brand-red font-bold hover:bg-red-50 rounded-md transition-colors flex items-center gap-2"
               onClick={handleLogout}
@@ -67,7 +63,7 @@ export const Header: React.FC = () => {
             </button>
           </>
         ) : (
-          // --- GIAO DIỆN KHI CHƯA ĐĂNG NHẬP (KHÁCH) ---
+          // --- GIAO DIỆN KHI CHƯA ĐĂNG NHẬP ---
           <>
             <Button 
               variant="outline-gray" 

@@ -3,7 +3,6 @@ import { Home, Thermometer, Radio, Database } from 'lucide-react';
 import { Button } from '../Button/Button';
 import { cn } from '../../utils';
 
-// Danh sách các mục điều hướng
 const navItems = [
   { name: 'TRANG CHỦ', icon: Home, active: true },
   { name: 'THÔNG SỐ MÔI TRƯỜNG', icon: Thermometer },
@@ -15,7 +14,6 @@ export const Sidebar: React.FC = () => {
   return (
     <aside className=" w-78 h-full flex flex-col p-6 text-white">
 
-      {/* Danh sách các nút điều hướng */}
       <nav className="flex flex-col gap-8">
         {navItems.map((item) => {
           const Icon = item.icon;

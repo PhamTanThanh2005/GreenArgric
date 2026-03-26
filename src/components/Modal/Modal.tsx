@@ -1,12 +1,12 @@
 import React, { Fragment } from 'react';
-import { X } from 'lucide-react'; // Cài thư viện lucide-react nếu chưa có
+import { X } from 'lucide-react';
 import { cn } from '../../utils';
 
 interface ModalProps {
     isOpen: boolean;
     onClose: () => void;
     children: React.ReactNode;
-    className?: string; // Tùy chỉnh thêm style cho hộp nội dung
+    className?: string;
 }
 
 export const Modal: React.FC<ModalProps> = ({ isOpen, onClose, children, className }) => {
@@ -35,7 +35,7 @@ export const Modal: React.FC<ModalProps> = ({ isOpen, onClose, children, classNa
                         </button>
                     </div>
 
-                    {/* Nội dung cụ thể bên trong modal */}
+                    {/* Nội dung trong modal */}
                     {children}
                 </div>
             </div>
