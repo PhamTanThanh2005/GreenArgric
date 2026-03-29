@@ -24,3 +24,12 @@ export const requireAdmin = (req, res, next) => {
     }
     next()
 }
+
+export const requireOwner = (req, res, next) => {
+    if (req.user.role !== "owner") {
+        return res.status(403).json({
+            error: "Chỉ owner mới được thao tác"
+        })
+    }
+    next()
+}
