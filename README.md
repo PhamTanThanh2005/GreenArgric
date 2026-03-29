@@ -95,7 +95,6 @@ node index.js
                 "role": "owner",
                 "user_id": 1
             }
-            - Trả về
         - Trả về
             ```json
                 [
