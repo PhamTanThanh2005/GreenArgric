@@ -31,7 +31,8 @@ INSERT INTO SensorData(sensor_id, value) VALUES
 
 INSERT INTO ThresholdConfig(device_id, sensor_type, min_value, max_value) VALUES
 (1, 'temp', 20, 30),             -- pump theo nhiệt độ
-(1, 'soil_moisture', 30, 70),    -- pump theo đất
+(1, 'soil_moisture', 30, 70),    -- pump theo độ ẩm đất
+(1, 'moisture', 40, 50),         -- pump theo độ ẩm không khí
 (2, 'light', 200, 700);          -- light theo ánh sáng
 
 INSERT INTO ActivityLog(device_id, mode, source) VALUES
