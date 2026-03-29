@@ -32,54 +32,54 @@ node index.js
     - GET: không có gì. Lấy cái mới nhất của từng type device
         - Trả về
             ``` json
-            [
-                {
-                    "type": "soil_moisture",
-                    "value": 20,
-                    "time": "2026-03-25T23:25:21.953Z"
-                },
-                {
-                    "type": "moisture",
-                    "value": 40,
-                    "time": "2026-03-25T23:25:21.953Z"
-                }, ...
-            ]
+                [
+                    {
+                        "type": "soil_moisture",
+                        "value": 20,
+                        "time": "2026-03-25T23:25:21.953Z"
+                    },
+                    {
+                        "type": "moisture",
+                        "value": 40,
+                        "time": "2026-03-25T23:25:21.953Z"
+                    }, ...
+                ]
             ```
     - GET: /type/:type - Lấy tất cả data theo type 
         - Trả về
             ```json
-            [
-                {
-                    "value": 27,
-                    "time": "2026-03-29T09:57:47.886Z"
-                }, ...
-            ]
+                [
+                    {
+                        "value": 27,
+                        "time": "2026-03-29T09:57:47.886Z"
+                    }, ...
+                ]
             ```
     - POST: không có gì - Để test truyền dữ liệu vào sensor cụ thể. Truyền vào body
         - Trả về
             ``` json
-            {
-                "sensor_id": 2,
-                "value": 1000
-            }
+                {
+                    "sensor_id": 2,
+                    "value": 1000
+                }
             ```
 
 - /threshold
     - POST: Không có gì
         - Truyền vào header
             ```json
-            {
-                "role": "admin",
-                "user_id": 2
-            }
+                {
+                    "role": "admin",
+                    "user_id": 2
+                }
             ```
         - Truyền vào body
             ```json
                 {
-                "device_id": 2,
-                "sensor_type": "temp",
-                "min_value": 20,
-                "max_value": 100
+                    "device_id": 2,
+                    "sensor_type": "temp",
+                    "min_value": 20,
+                    "max_value": 100
                 }
             ```
         - Trả về 
@@ -91,10 +91,10 @@ node index.js
     - GET: Không có gì
         - Truyền vào header
             ```json
-            {
-                "role": "owner",
-                "user_id": 1
-            }
+                {
+                    "role": "owner",
+                    "user_id": 1
+                }
         - Trả về
             ```json
                 [
@@ -108,10 +108,10 @@ node index.js
     - POST: /:id - Để đánh dấu là đã đọc và không hiện thị nữa
         - Truyền vào header
             ```json
-            {
-                "role": "owner",
-                "user_id": 1
-            }
+                {
+                    "role": "owner",
+                    "user_id": 1
+                }
             ```
         - Trả về
             ```json
