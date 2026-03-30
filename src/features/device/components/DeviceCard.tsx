@@ -15,7 +15,7 @@ export const DeviceCard: React.FC<DeviceCardProps> = ({
   title,
   image,
   status,
-  isActive = false,
+  // isActive = false,
   onDetailClick,
   onToggleClick,
   isLoading = false,

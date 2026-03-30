@@ -15,10 +15,10 @@ export const WeatherCard: React.FC = () => {
         <MapPin size={18} />
         <span>Tp. Đà Lạt</span>
       </div>
-      
+
       {/* Icon Weather */}
       <div className="absolute top-20 right-20 bg-white p-4 rounded-full flex items-center justify-center">
-         <CloudSun size={60} className='text-brand-green'/>
+        <CloudSun size={60} className='text-brand-green' />
       </div>
 
       <div className="absolute bottom-2 left-6">

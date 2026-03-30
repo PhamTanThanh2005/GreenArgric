@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import { Eye, EyeOff } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { loginUser } from '../api/auth'; 
+import axios, { AxiosError } from 'axios';
 
 interface LoginFormProps {
   role: string; 
@@ -26,17 +27,28 @@ export const LoginForm: React.FC<LoginFormProps> = ({ role }) => {
     try {
       const data = await loginUser({ username, password, role });
 
-      localStorage.setItem('token', `Bearer ${data.access_token}`);
-      localStorage.setItem('role', data.role);
+      // localStorage.setItem('token', `Bearer ${data.access_token}`);
+      // localStorage.setItem('role', data.role);
+
+      const userRole = data.user.role; 
+      localStorage.setItem('role', userRole);
       
-      if (data.role === 'chu_vuon') {
+      if (userRole === 'owner') {
         navigate('/dashboard'); 
-      } else if (data.role === 'admin') {
+      } else if (userRole === 'admin') {
         navigate('/admin-dashboard'); 
       }
 
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err: unknown) {
+      if (axios.isAxiosError(err)) {
+        const axiosErr = err as AxiosError<{message?: string }>; 
+        const backendMessage = axiosErr.response?.data?.message;
+        setError(backendMessage || axiosErr.message);
+      } else if (err instanceof Error) {
+        setError(err.message);
+      } else {
+        setError('Đã xảy ra lỗi không xác định.');
+      }
     } finally {
       setIsLoading(false);
     }

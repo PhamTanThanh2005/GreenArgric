@@ -9,7 +9,7 @@ export const fetchWithAuth = async (endpoint: string, options: RequestInit = {})
     ...(token ? { Authorization: token } : {}), 
   };
 
-  const response = await fetch(`http://localhost:3001${endpoint}`, {
+  const response = await fetch(`http://localhost:3000${endpoint}`, {
     ...options,
     headers,
   });

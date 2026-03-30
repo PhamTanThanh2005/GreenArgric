@@ -1,38 +1,78 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { ThermometerSun, Sprout, Droplets, Sun } from 'lucide-react';
 import { WeatherCard } from '../features/dashboard/components/WeatherCard';
 import { StatCard } from '../features/dashboard/components/StatCard';
-import { ChartCard } from '../features/dashboard/components/ChartCard';
-
-// Dữ liệu mock cho biểu đồ
-const chartData1 = [
-  { name: 'Jan', value: 27 }, { name: 'Feb', value: 26 }, { name: 'Mar', value: 27 }, { name: 'Apr', value: 27.5 }, { name: 'May', value: 25.3 }, { name: 'Jun', value: 22.6 },
-];
-const chartData2 = [
-  { name: 'Jan', value: 25.2 }, { name: 'Feb', value: 27.5 }, { name: 'Mar', value: 29.4 }, { name: 'Apr', value: 70.1 }, { name: 'May', value: 98.3 }, { name: 'Jun', value: 68.4 },
-];
-const chartData3 = [
-  { name: 'Jan', value: 86.1 }, { name: 'Feb', value: 35.4 }, { name: 'Mar', value: 87.3 }, { name: 'Apr', value: 88.5 }, { name: 'May', value: 75.2 }, { name: 'Jun', value: 73.3 },
-];
+import { getLatestSensors } from '../features/dashboard/api/sensorApi'; 
 
 export const DashboardPage: React.FC = () => {
+
+  const [sensorValues, setSensorValues] = useState({
+    temperature: '--',
+    soil_moisture: '--',
+    moisture: '--',
+    light: '--'
+  });
+
+  useEffect(() => {
+    const fetchAllSensors = async () => {
+      try {
+        const data = await getLatestSensors(); 
+
+        if (data && data.length > 0) {
+          setSensorValues(prev => {
+            const newValues = { ...prev };
+            
+            data.forEach(sensor => {
+              switch (sensor.type) {
+                case 'temp':
+                  newValues.temperature = sensor.value.toString();
+                  break;
+                case 'soil_moisture':
+                  newValues.soil_moisture = sensor.value.toString();
+                  break;
+                case 'moisture':
+                  newValues.moisture = sensor.value.toString();
+                  break;
+                case 'light':
+                  newValues.light = sensor.value.toString();
+                  break;
+                default:
+                  break;
+              }
+            });
+            
+            return newValues;
+          });
+        }
+      } catch (error) {
+        console.error("Lỗi khi lấy dữ liệu sensor:", error);
+      }
+    };
+
+    fetchAllSensors();
+
+    const intervalId = setInterval(fetchAllSensors, 5000);
+
+    return () => clearInterval(intervalId);
+  }, []);
+
   return (
     <div className="p-8 flex-1 flex flex-col gap-6 bg-white">
       <h2 className="text-2xl font-medium text-black font-playwrite">Xin chào,</h2>
       <WeatherCard />
 
       <div className="grid grid-cols-2 gap-6">
-        <StatCard icon={ThermometerSun} label="Nhiệt độ" value="35" unit="°C" trend="up" />
-        <StatCard icon={Sprout} label="Độ ẩm đất" value="70" unit="%" trend="up" />
-        <StatCard icon={Droplets} label="Độ ẩm" value="85" unit="%" trend="up" />
-        <StatCard icon={Sun} label="Ánh sáng" value="75" unit="%" trend="up" />
-      </div>
-
-      <div className="grid grid-cols-2 gap-8">
-        <ChartCard title="Nhiệt độ" type="area" data={chartData1} dataKeyX="name" dataKeyY="value" chartColor="#1b5e3a" />
-        <ChartCard title="Độ ẩm đất" type="bar" data={chartData2} dataKeyX="name" dataKeyY="value" chartColor="#c4e3d3" />
-        <ChartCard title="Độ ẩm" type="bar" data={chartData3} dataKeyX="name" dataKeyY="value" chartColor="#c4e3d3" />
-        <ChartCard title="Ánh sáng" type="area" data={chartData1} dataKeyX="name" dataKeyY="value" chartColor="#1b5e3a" />
+        <StatCard icon={ThermometerSun} label="Nhiệt độ" value={sensorValues.temperature} unit="°C" trend="up" />
+        <StatCard icon={Sprout} label="Độ ẩm đất" value={sensorValues.soil_moisture} unit="%" trend="up" />
+        <StatCard icon={Droplets} label="Độ ẩm" value={sensorValues.moisture} unit="%" trend="up" />
+        
+        <StatCard 
+          icon={Sun} 
+          label="Ánh sáng" 
+          value={sensorValues.light} 
+          unit="lux"
+          trend="up" 
+        />
       </div>
     </div>
   );
