@@ -2,7 +2,7 @@
 
 > Hệ thống quản trị và giám sát nông nghiệp thông minh (Smart IoT Greenhouse).
 
-Green Argric là một nền tảng Web Application hiện đại, được thiết kế để giúp chủ vườn và quản trị viên giám sát thông số môi trường theo thời gian thực (Nhiệt độ, Độ ẩm, Ánh sáng) và điều khiển các thiết bị phần cứng IoT (Máy bơm, Đèn LED) thông qua giao thức API và Adafruit IO.
+Green Argric là một nền tảng Web Application hiện đại, được thiết kế để giúp chủ vườn và quản trị viên giám sát thông số môi trường theo thời gian thực (Nhiệt độ, Độ ẩm, Ánh sáng) và điều khiển các thiết bị phần cứng IoT (Máy bơm, Đèn LED) thông qua MQTT.
 
 ---
 
