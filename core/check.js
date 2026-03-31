@@ -7,7 +7,7 @@ import { logActivity } from "./utils.js"
 
 import { CONTROL_PUMP, CONTROL_LIGHT } from "./const.js"
 
-// client.on("message", async () => {
+client.on("message", async () => {
     try {
         const result = await pool.request().query(`
             SELECT s.type, sd.value, sd.time
@@ -252,6 +252,6 @@ import { CONTROL_PUMP, CONTROL_LIGHT } from "./const.js"
     } catch (error) {
         console.error("Error fetching last sensor data:", error)
     }
-// })
+})
 
     

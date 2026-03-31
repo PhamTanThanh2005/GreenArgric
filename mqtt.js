@@ -59,7 +59,16 @@ client.on("message", async (topic, message) => {
 
     // Value
     const value = parseFloat(message.toString())
-    console.log(`Sensor ${sensor_id} value:`, value)
+    // console.log(`Sensor ${sensor_id} value:`, value)
+    if (sensor_id === 1) {
+        console.log(`\x1b[36mTemperature:\x1b[0m ${value}°C`)
+    } else if (sensor_id === 2) {
+        console.log(`\x1b[36mLight:\x1b[0m ${value} lux`)
+    } else if (sensor_id === 3) {
+        console.log(`\x1b[36mHumidity:\x1b[0m ${value}%`)
+    } else if (sensor_id === 4) {
+        console.log(`\x1b[36mSoil Moisture:\x1b[0m ${value}%`)
+    }
 
     // Insert into DB
     try {

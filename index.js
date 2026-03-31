@@ -6,7 +6,7 @@ import reminder from "./routes/reminder.js"
 import divice from "./routes/device.js"
 
 import "./mqtt.js"
-import "./core/check.js"
+// import "./core/check.js"
 
 const app = express()
 
