@@ -105,7 +105,7 @@ client.on("message", async () => {
                     `)
             } else if (data["soil_moisture"] < pumpThresholdData["soil_moisture"].min + 10 && data["temp"] > pumpThresholdData["temp"].max) {
                 console.log("Pump ON")
-                client.publish(CONTROL_PUMP, "ON", { retain: true })
+                client.publish(CONTROL_PUMP, "1", { retain: true })
                 // Insert ActivityLog
                 logActivity(pumpDeviceResult.recordset[0].id, "ON", "auto")
 
@@ -120,7 +120,7 @@ client.on("message", async () => {
                     `)
             } else if (data["soil_moisture"] < pumpThresholdData["soil_moisture"].min + 10 && data["moisture"] > pumpThresholdData["moisture"].max) {
                 console.log("Pump ON")
-                client.publish(CONTROL_PUMP, "ON", { retain: true })
+                client.publish(CONTROL_PUMP, "1", { retain: true })
                 // Insert ActivityLog
                 logActivity(pumpDeviceResult.recordset[0].id, "ON", "auto")
 
@@ -138,7 +138,7 @@ client.on("message", async () => {
         else if (lastModeInPump === 'ON') {
             if (data["soil_moisture"] > pumpThresholdData["soil_moisture"].max) {
                 console.log("Pump OFF")
-                client.publish(CONTROL_PUMP, "OFF", { retain: true })
+                client.publish(CONTROL_PUMP, "0", { retain: true })
                 // Insert ActivityLog
                 logActivity(pumpDeviceResult.recordset[0].id, "OFF", "auto")
 
@@ -213,7 +213,7 @@ client.on("message", async () => {
         else if (lastModeInLight === 'OFF') {
             if (data["light"] < lightThresholdData["light"].min) {
                 console.log("Light ON")
-                client.publish(CONTROL_LIGHT, "ON", { retain: true })
+                client.publish(CONTROL_LIGHT, "1", { retain: true })
 
                 // Insert ActivityLog
                 logActivity(lightDeviceResult.recordset[0].id, "ON", "auto")
@@ -232,7 +232,7 @@ client.on("message", async () => {
         else if (lastModeInLight === 'ON') {
             if (data["light"] > lightThresholdData["light"].max) {
                 console.log("Light OFF")
-                client.publish(CONTROL_LIGHT, "OFF", { retain: true })
+                client.publish(CONTROL_LIGHT, "0", { retain: true })
 
                 // Insert ActivityLog
                 logActivity(lightDeviceResult.recordset[0].id, "OFF", "auto")

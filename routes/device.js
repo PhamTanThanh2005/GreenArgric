@@ -32,7 +32,7 @@ router.get("/", mockAuth, requireOwner, async (req, res) => {
         const result = await pool.request()
             .input("user_id", sql.Int, user_id)
             .query(`
-                SELECT d.type, a.mode, a.time
+                SELECT d.type, a.mode, a.time, d.id
                 FROM (
                     SELECT *,
                         ROW_NUMBER() OVER (PARTITION BY device_id ORDER BY time DESC) AS rn
