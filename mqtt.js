@@ -1,52 +1,69 @@
 import mqtt from "mqtt"
 import pool, { sql } from "./db.js"
+import "dotenv/config"
 
 // ===== MQTT CONFIG =====
-const client = mqtt.connect("wss://mqtt.ohstem.vn:8084/mqtt", {
-    username: "MinhTriDADN",
-    password: "",
+export const client = mqtt.connect(process.env.MQTT_BROKER || "wss://mqtt.ohstem.vn:8084/mqtt", {
+    username: process.env.MQTT_USERNAME || "MinhTriDADN",
+    password: process.env.MQTT_PASSWORD || "",
     clientId: "server_" + Math.random().toString(16).substring(2, 10)
 })
 
-const TOPIC_SENSOR = "MinhTriDADN/feeds/V1" // cảm biến nhiệt
-const TOPIC_SENSORc = "MinhTriDADN/feeds/V2" // cảm biến độ ẩm kk
-const TOPIC_CONTROL = "MinhTriDADN/feeds/V11" // máy bơm
+const SENSOR_RT = `${process.env.MQTT_FEED || "MinhTriDADN/feeds"}/V1` // cảm biến nhiệt
+const SENSOR_RH = `${process.env.MQTT_FEED || "MinhTriDADN/feeds"}/V2` // cảm biến độ ẩm kk
+const SENSOR_SM = `${process.env.MQTT_FEED || "MinhTriDADN/feeds"}/V3` // cảm biến độ ẩm đất
+const SENSOR_LUX = `${process.env.MQTT_FEED || "MinhTriDADN/feeds"}/V4` // cảm biến ánh sáng
 
 // ===== CONNECT =====
 client.on("connect", () => {
-    console.log("MQTT Backend connected")
+    // CONSOLE
+    console.log("\x1b[32m%s\x1b[0m", "MQTT Backend connected")
 
-    client.subscribe(TOPIC_SENSOR, (err) => {
-        if (err) console.error("Subscribe error:", err)
-        else console.log("Subscribed to sensor topic")
+    client.subscribe(SENSOR_RT, (err) => {
+        if (err) console.error("\x1b[31mSubscribe error:\x1b[0m", err)
+        else console.log("Subscribed to sensor topic:", SENSOR_RT)
     })
 
-    client.subscribe(TOPIC_SENSORc, (err) => {
-        if (err) console.error("Subscribe error:", err)
-        else console.log("Subscribed to sensor topic")
+    client.subscribe(SENSOR_RH, (err) => {
+        if (err) console.error("\x1b[31mSubscribe error:\x1b[0m", err)
+        else console.log("Subscribed to sensor topic:", SENSOR_RH)
     })
-}) 
+
+    client.subscribe(SENSOR_SM, (err) => {
+        if (err) console.error("\x1b[31mSubscribe error:\x1b[0m", err)
+        else console.log("Subscribed to sensor topic:", SENSOR_SM)
+    })
+
+    client.subscribe(SENSOR_LUX, (err) => {
+        if (err) console.error("\x1b[31mSubscribe error:\x1b[0m", err)
+        else console.log("Subscribed to sensor topic:", SENSOR_LUX)
+    })
+})
 
 // ===== HANDLE MESSAGE =====
 client.on("message", async (topic, message) => {
     let sensor_id
 
-    if (topic === TOPIC_SENSOR) {
+    if (topic === SENSOR_RT) {
         sensor_id = 1   // nhiệt độ
-    } else if (topic === TOPIC_SENSORc) {
-        sensor_id = 2   // độ ẩm
+    } else if (topic === SENSOR_RH) {
+        sensor_id = 3   // độ ẩm kk
+    } else if (topic === SENSOR_SM) {
+        sensor_id = 4   // độ ẩm đất
+    } else if (topic === SENSOR_LUX) {
+        sensor_id = 2   // ánh sáng
     } else {
+        console.warn("\x1b[33mReceived message on unknown topic:\x1b[0m", topic)
         return
     }
 
+    // Value
     const value = parseFloat(message.toString())
-
     console.log(`Sensor ${sensor_id} value:`, value)
 
+    // Insert into DB
     try {
-        // =======================
-        // 1. Lưu SensorData
-        // =======================
+        // Insert SensorData
         await pool.request()
             .input("sensor_id", sql.Int, sensor_id)
             .input("value", sql.Float, value)
@@ -54,102 +71,12 @@ client.on("message", async (topic, message) => {
                 INSERT INTO SensorData(sensor_id, value)
                 VALUES (@sensor_id, @value)
             `)
-
-        // =======================
-        // 2. Lấy loại sensor
-        // =======================
-        const sensorResult = await pool.request()
-            .input("sensor_id", sql.Int, sensor_id)
-            .query(`
-                SELECT type FROM Sensor WHERE id = @sensor_id
-            `)
-
-        if (sensorResult.recordset.length === 0) return
-
-        const sensorType = sensorResult.recordset[0].type
-
-        // =======================
-        // 3. Lấy device liên quan
-        // =======================
-        const deviceResult = await pool.request()
-            .input("sensor_id", sql.Int, sensor_id)
-            .query(`
-                SELECT d.id, d.type, d.user_id
-                FROM Device d
-                JOIN SensorDevice sd ON d.id = sd.device_id
-                WHERE sd.sensor_id = @sensor_id
-            `)
-
-        // =======================
-        // 4. Duyệt từng device
-        // =======================
-        for (const device of deviceResult.recordset) {
-
-            // lấy threshold
-            const thresholdResult = await pool.request()
-                .input("device_id", sql.Int, device.id)
-                .input("sensor_type", sql.NVarChar, sensorType)
-                .query(`
-                    SELECT min_value, max_value
-                    FROM ThresholdConfig
-                    WHERE device_id = @device_id
-                    AND sensor_type = @sensor_type
-                `)
-
-            if (thresholdResult.recordset.length === 0) continue
-
-            const { min_value, max_value } = thresholdResult.recordset[0]
-
-            // =======================
-            // 5. Check vượt ngưỡng
-            // =======================
-            if (value < min_value || value > max_value) {
-
-                const mode = "ON"
-                const payload = mode === "ON" ? "1" : "0"
-
-                console.log(`⚠️ Vượt ngưỡng → ${device.type} ${mode}`)
-
-                // =======================
-                // 6. Gửi lệnh MQTT tới device
-                // =======================
-                client.publish(TOPIC_CONTROL, payload, { retain: true })
-
-                // =======================
-                // 7. ActivityLog
-                // =======================
-                await pool.request()
-                    .input("device_id", sql.Int, device.id)
-                    .input("mode", sql.NVarChar, mode)
-                    .input("source", sql.NVarChar, "auto")
-                    .query(`
-                        INSERT INTO ActivityLog(device_id, mode, source)
-                        VALUES (@device_id, @mode, @source)
-                    `)
-
-                // =======================
-                // 8. Reminder
-                // =======================
-                await pool.request()
-                    .input("user_id", sql.Int, device.user_id)
-                    .input("desc", sql.NVarChar,
-                        `Sensor ${sensorType} vượt ngưỡng (${value}) → ${device.type} ${mode}`)
-                    .query(`
-                        INSERT INTO Reminder(user_id, description, time)
-                        VALUES (@user_id, @desc, GETDATE())
-                    `)
-            } else {
-                // Nếu trong ngưỡng, tắt thiết bị
-                const mode = "OFF"
-                const payload = "0"
-
-                client.publish(TOPIC_CONTROL, payload, { retain: true })
-            }
-        }
-
-    } catch (err) {
-        console.error("❌ MQTT processing error:", err)
+        // Cleanup expired manual overrides
+        await pool.request().query(`
+            DELETE FROM ManualOverride
+            WHERE expire_time < GETDATE()
+        `)
+    } catch (error) {
+        console.error("\x1b[31mError inserting sensor data:\x1b[0m", error)
     }
 })
-
-export default client

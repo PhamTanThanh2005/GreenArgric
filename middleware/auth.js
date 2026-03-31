@@ -4,7 +4,7 @@ export const mockAuth = (req, res, next) => {
 
     if (!user_id || !role) {
         return res.status(401).json({
-            error: "Chưa đăng nhập"
+            error: "Not logged in yet"
         })
     }
 
@@ -19,7 +19,16 @@ export const mockAuth = (req, res, next) => {
 export const requireAdmin = (req, res, next) => {
     if (req.user.role !== "admin") {
         return res.status(403).json({
-            error: "Chỉ admin mới được thao tác"
+            error: "Only admins can perform this action"
+        })
+    }
+    next()
+}
+
+export const requireOwner = (req, res, next) => {
+    if (req.user.role !== "owner") {
+        return res.status(403).json({
+            error: "Only owners can perform this action"
         })
     }
     next()

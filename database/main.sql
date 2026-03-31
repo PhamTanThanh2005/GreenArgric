@@ -82,7 +82,15 @@ CREATE TABLE Reminder (
     user_id INT NOT NULL,
     description NVARCHAR(255),
     time DATETIME2 NOT NULL,
-    is_done BIT DEFAULT 0,
+    is_done BIT DEFAULT 0, 
 
     FOREIGN KEY (user_id) REFERENCES [User](id)
 );
+
+CREATE TABLE ManualOverride (
+    id INT IDENTITY(1,1) PRIMARY KEY,
+    device_id INT,
+    mode NVARCHAR(10), -- ON / OFF
+    expire_time DATETIME,
+    created_at DATETIME DEFAULT GETDATE()
+)

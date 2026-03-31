@@ -11,7 +11,7 @@ router.post("/login", async (req, res) => {
 
     if (!username || !password) {
         return res.status(400).json({
-            error: "Thiếu username hoặc password"
+            error: "Missing username or password"
         })
     }
 
@@ -34,7 +34,7 @@ router.post("/login", async (req, res) => {
         const user = result.recordset[0]
 
         res.json({
-            message: "Login thành công",
+            message: "Login successful",
             user: {
                 id: user.id,
                 name: user.name,

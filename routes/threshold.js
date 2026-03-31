@@ -13,13 +13,13 @@ router.post("/", mockAuth, requireAdmin, async (req, res) => {
     // ===== Validate =====
     if (!device_id || !sensor_type) {
         return res.status(400).json({
-            error: "Thiếu device_id hoặc sensor_type"
+            error: "Missing device_id or sensor_type"
         })
     }
 
     if (min_value == null && max_value == null) {
         return res.status(400).json({
-            error: "Phải có ít nhất min_value hoặc max_value"
+            error: "There must be at least min_value or max_value."
         })
     }
 
@@ -63,7 +63,7 @@ router.post("/", mockAuth, requireAdmin, async (req, res) => {
             `)
 
         res.json({
-            message: "Cập nhật ngưỡng thành công"
+            message: "Inserted + processed successfully"
         })
 
     } catch (err) {
