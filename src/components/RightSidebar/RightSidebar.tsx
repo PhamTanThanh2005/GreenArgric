@@ -12,7 +12,7 @@ const notifications = [
 
 export const RightSidebar: React.FC = () => {
   return (
-    <aside className="w-100 flex flex-col p-6 text-white border-l-3 border-brand-green/50 gap-8 bg-white overflow-y-auto shrink-0">
+    <aside className="w-90 flex flex-col p-6 text-white border-l-3 border-brand-green/50 gap-8 bg-white overflow-y-auto shrink-0">
       <Calendar />
       <div className="flex flex-col gap-6 justify-center">
         <h3 className="text-xl font-bold text-brand-green">THÔNG BÁO</h3>

@@ -4,10 +4,10 @@ import React, { useState } from 'react';
 import { Eye, EyeOff } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { loginUser } from '../api/auth'; 
-import axios, { AxiosError } from 'axios';
+// Đã xóa import axios vì API ở auth.ts đang dùng fetch
 
 interface LoginFormProps {
-  role: string; 
+  role: string; // Role này (Chủ vườn / Quản trị viên) chỉ dùng để hiển thị text trên UI
 }
 
 export const LoginForm: React.FC<LoginFormProps> = ({ role }) => {
@@ -25,29 +25,30 @@ export const LoginForm: React.FC<LoginFormProps> = ({ role }) => {
     setIsLoading(true);
 
     try {
-      const data = await loginUser({ username, password, role });
+      // Chỉ truyền username và password xuống API
+      const data = await loginUser({ username, password });
 
-      // localStorage.setItem('token', `Bearer ${data.access_token}`);
-      // localStorage.setItem('role', data.role);
+      // Lưu thông tin cần thiết vào Local Storage
+      localStorage.setItem('access_token', data.access_token);
+      localStorage.setItem('role', data.user.role); 
+      localStorage.setItem('user_name', data.user.name); // Lưu thêm tên để hiển thị "Xin chào, Nguyễn Văn A" ở Dashboard
 
+      // Điều hướng dựa trên role từ Backend trả về
       const userRole = data.user.role; 
-      localStorage.setItem('role', userRole);
-      
       if (userRole === 'owner') {
         navigate('/dashboard'); 
       } else if (userRole === 'admin') {
         navigate('/admin-dashboard'); 
+      } else {
+        navigate('/dashboard'); // Mặc định
       }
 
     } catch (err: unknown) {
-      if (axios.isAxiosError(err)) {
-        const axiosErr = err as AxiosError<{message?: string }>; 
-        const backendMessage = axiosErr.response?.data?.message;
-        setError(backendMessage || axiosErr.message);
-      } else if (err instanceof Error) {
+      // Vì auth.ts dùng fetch và throw Error, ta chỉ cần bắt Error thông thường
+      if (err instanceof Error) {
         setError(err.message);
       } else {
-        setError('Đã xảy ra lỗi không xác định.');
+        setError('Đã xảy ra lỗi không xác định từ máy chủ.');
       }
     } finally {
       setIsLoading(false);
