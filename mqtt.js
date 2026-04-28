@@ -28,21 +28,18 @@ client.on("message", async (topic, message) => {
     let sensor_id;
     const value = parseFloat(message.toString());
 
-    // Map topic với ID cảm biến (Giả sử các cảm biến này đang cắm ở Khu A - ID=1)
     if (topic === SENSOR_RT) sensor_id = 1;
     else if (topic === SENSOR_RH) sensor_id = 3; 
-    else if (topic === SENSOR_SM) sensor_id = 2; // Trong file SQL mock data, ẩm đất là 2
+    else if (topic === SENSOR_SM) sensor_id = 2;
     else if (topic === SENSOR_LUX) sensor_id = 4;
     else return;
 
     try {
-        // 1. Lưu vào Database (SensorData)
         await pool.request()
             .input("sensor_id", sql.Int, sensor_id)
             .input("value", sql.Float, value)
             .query("INSERT INTO SensorData(sensor_id, value) VALUES (@sensor_id, @value)");
 
-        // 2. Lấy thông tin Area và Sensor Type để chuẩn bị check ngưỡng
         const sensorInfo = await pool.request()
             .input("sensor_id", sql.Int, sensor_id)
             .query("SELECT area_id, type, name FROM Sensor WHERE id = @sensor_id");
@@ -50,7 +47,6 @@ client.on("message", async (topic, message) => {
         if (sensorInfo.recordset.length === 0) return;
         const { area_id, type: sensor_type, name: sensor_name } = sensorInfo.recordset[0];
 
-        // 3. Lấy Ngưỡng (Threshold) của khu vực này
         const threshold = await pool.request()
             .input("area_id", sql.Int, area_id)
             .input("sensor_type", sql.NVarChar, sensor_type)
@@ -59,11 +55,7 @@ client.on("message", async (topic, message) => {
         if (threshold.recordset.length > 0) {
             const { min_value, max_value } = threshold.recordset[0];
 
-            // ----------------------------------------------------
-            // UC3: CẢNH BÁO VƯỢT NGƯỠNG
-            // ----------------------------------------------------
             if (value > max_value || value < min_value) {
-                // Lấy danh sách Owner của khu vực để gửi thông báo
                 const owners = await pool.request()
                     .input("area_id", sql.Int, area_id)
                     .query("SELECT user_id FROM User_Area WHERE area_id = @area_id");
@@ -81,22 +73,16 @@ client.on("message", async (topic, message) => {
                 }
             }
 
-            // ----------------------------------------------------
-            // UC5: ĐIỀU KHIỂN TỰ ĐỘNG
-            // ----------------------------------------------------
-            // Xóa các lệnh Manual Override đã hết hạn
             await pool.request().query("DELETE FROM ManualOverride WHERE expire_time < GETDATE()");
 
-            // TỰ ĐỘNG BẬT BƠM NẾU ĐẤT KHÔ
+
             if (sensor_type === 'soil_moisture' && value < min_value) {
                 await autoControlDevice(area_id, 'pump', 'ON', CONTROL_PUMP, '1');
             }
-            // TỰ ĐỘNG TẮT BƠM NẾU ĐẤT ĐÃ ĐỦ ẨM
             else if (sensor_type === 'soil_moisture' && value >= max_value) {
                 await autoControlDevice(area_id, 'pump', 'OFF', CONTROL_PUMP, '0');
             }
 
-            // (Tương tự, bạn có thể tự viết thêm logic bật/tắt đèn ở đây nếu ánh sáng thấp)
         }
 
     } catch (error) {
@@ -104,9 +90,7 @@ client.on("message", async (topic, message) => {
     }
 });
 
-// Hàm hỗ trợ điều khiển thiết bị tự động
 async function autoControlDevice(area_id, device_type, mode, mqtt_topic, mqtt_payload) {
-    // Tìm thiết bị trong khu vực
     const deviceResult = await pool.request()
         .input("area_id", sql.Int, area_id)
         .input("type", sql.NVarChar, device_type)
@@ -115,24 +99,20 @@ async function autoControlDevice(area_id, device_type, mode, mqtt_topic, mqtt_pa
     if (deviceResult.recordset.length === 0) return;
     const device_id = deviceResult.recordset[0].id;
 
-    // KIỂM TRA OVERRIDE: Nếu thiết bị này đang bị điều khiển bằng tay thì KHÔNG được phép tự động can thiệp
     const overrideCheck = await pool.request()
         .input("device_id", sql.Int, device_id)
         .query("SELECT * FROM ManualOverride WHERE device_id = @device_id");
 
-    if (overrideCheck.recordset.length > 0) return; // Bỏ qua tự động
+    if (overrideCheck.recordset.length > 0) return;
 
-    // Tránh gửi lệnh MQTT liên tục trùng lặp (nếu đã ON thì không ON nữa)
     const lastState = await pool.request()
         .input("device_id", sql.Int, device_id)
         .query("SELECT TOP 1 mode FROM ActivityLog WHERE device_id = @device_id ORDER BY time DESC");
 
     if (lastState.recordset.length > 0 && lastState.recordset[0].mode === mode) return;
 
-    // 1. Publish MQTT
     client.publish(mqtt_topic, mqtt_payload, { retain: true });
 
-    // 2. Ghi Log
     await pool.request()
         .input("device_id", sql.Int, device_id)
         .input("mode", sql.NVarChar, mode)

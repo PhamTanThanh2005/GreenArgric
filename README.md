@@ -62,9 +62,12 @@ MQTT_FEED=MinhTriDADN/feeds
 
 
 #### Area
-| Method | Endpoint | Auth | 
-|--------|----------|------|
-| GET    | /area    | ✅   |
+| Method | Endpoint  | Auth | 
+|--------|-----------|------|
+| GET    | /area     | ✅   |
+| POST   | /area     | ✅   |
+| PUT    | /area/:id | ✅   |
+| DELETE | /area/:id | ✅   |
 
 
 #### Sensor
@@ -76,6 +79,7 @@ MQTT_FEED=MinhTriDADN/feeds
 | POST   | /sensor                                     | ✅   | 
 | PUT    | /sensor/:id                                 | ✅   |
 | DELETE | /sensor/:id                                 | ✅   |
+
 #### Device
 | Method | Endpoint              | Auth | 
 |--------|----------------------|------|
@@ -136,6 +140,7 @@ Trả về (Success 200):
 ```
 
 ### Khu vực (Area)
+#### Lấy tất cả các khu vực trong nhà kính
 Endpoint: ```GET /area```
 Nhận vào: Header Token.
 Trả về (Success 200): Danh sách khu vực mà người dùng có quyền xem.
@@ -148,6 +153,54 @@ Trả về (Success 200): Danh sách khu vực mà người dùng có quyền xe
   }
 ]
 ```
+#### Thêm khu vực
+Endpoint: ```POST area/``
+
+Nhận vào (Body JSON):
+```json
+{
+  "name": "Nhà màng 02",
+  "description": "Khu vực nuôi cấy mô",
+  "owner_id": 2
+}
+```
+Trả về (Success 200): 
+```json
+{
+  "message": "Tạo khu vực thành công",
+  "area_id": 2
+}
+```
+#### Chỉnh sửa khu vực
+Endpoint: ```PUT area/:id```
+
+Mô tả: Cập nhật, chỉnh sửa thông tin khu vực
+
+Nhận vào (Body JSON):
+```json
+{
+  "name": "Nhà màng 02 - Cập nhật",
+  "description": "Đã chuyển sang trồng dâu tây"
+}
+```
+Trả về (Success 200): 
+```json
+{
+  "message": "Cập nhật khu vực thành công"
+}
+```
+#### Xóa khu vực
+Endpoint: ```DELETE area/:id```
+
+Mô tả: Xóa khu vực
+
+Trả về (Success 200): 
+```json
+{
+  "message": "Xóa khu vực thành công"
+}
+```
+
 
 ### Cảm biến (Sensor)
 #### Lấy tất cả các cảm biến trong hệ thống
@@ -198,7 +251,7 @@ Endpoint: ```GET /sensor/area/:area_id/history/:type```
 Tham số ```:type: temp, moisture, soil_moisture, light.``` 
 
 Trả về (Success 200): Mảng dữ liệu lịch sử để vẽ biểu đồ.
-```bash
+```json
 [
   { "value": 26.5, "time": "2026-04-28T15:00:00Z" },
   { "value": 26.2, "time": "2026-04-28T14:50:00Z" }

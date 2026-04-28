@@ -28,7 +28,7 @@ router.get("/", verifyToken, async (req, res) => {
 });
 
 // =======================
-// POST Thêm khu vực mới (Chỉ Admin)
+// POST Thêm khu vực mới
 // =======================
 router.post("/", verifyToken, requireAdmin, async (req, res) => {
     const { name, description, owner_id } = req.body;
@@ -66,5 +66,56 @@ router.post("/", verifyToken, requireAdmin, async (req, res) => {
     }
 });
 
-// Bạn có thể tự bổ sung thêm PUT (Sửa) và DELETE (Xóa) tại đây
+// =======================
+// PUT Cập nhật khu vực (Admin)
+// =======================
+router.put("/:id", verifyToken, requireAdmin, async (req, res) => {
+    const { id } = req.params;
+    const { name, description } = req.body;
+
+    try {
+        const result = await pool.request()
+            .input("id", sql.Int, id)
+            .input("name", sql.NVarChar, name)
+            .input("description", sql.NVarChar, description)
+            .query(`
+                UPDATE Area 
+                SET name = ISNULL(@name, name), 
+                    description = ISNULL(@description, description)
+                WHERE id = @id
+            `);
+
+        if (result.rowsAffected[0] === 0) {
+            return res.status(404).json({ error: "Không tìm thấy khu vực để cập nhật" });
+        }
+
+        res.json({ message: "Cập nhật khu vực thành công" });
+    } catch (error) {
+        res.status(500).json({ error: "Lỗi server nội bộ" });
+    }
+});
+
+// =======================
+// DELETE Xóa khu vực (Admin)
+// =======================
+router.delete("/:id", verifyToken, requireAdmin, async (req, res) => {
+    const { id } = req.params;
+
+    try {
+        const result = await pool.request()
+            .input("id", sql.Int, id)
+            .query("DELETE FROM Area WHERE id = @id");
+
+        if (result.rowsAffected[0] === 0) {
+            return res.status(404).json({ error: "Không tìm thấy khu vực để xóa" });
+        }
+
+        res.json({ message: "Xóa khu vực thành công" });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: "Lỗi server nội bộ (Có thể do khu vực vẫn còn thiết bị/cảm biến)" });
+    }
+});
+
+
 export default router;

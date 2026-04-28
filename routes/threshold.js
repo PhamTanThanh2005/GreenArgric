@@ -19,7 +19,6 @@ router.post("/", verifyToken, requireAdmin, async (req, res) => {
     }
 
     try {
-        // Kiểm tra Khu vực tồn tại
         const areaCheck = await pool.request()
             .input("area_id", sql.Int, area_id)
             .query("SELECT id FROM Area WHERE id = @area_id");

@@ -49,7 +49,7 @@ router.post("/override", verifyToken, async (req, res) => {
     const userId = req.user.id;
 
     try {
-        // 1. UPSERT vào ManualOverride (Composite Key: user_id, device_id)
+        // ManualOverride (Composite Key: user_id, device_id)
         await pool.request()
             .input("user_id", sql.Int, userId)
             .input("device_id", sql.Int, device_id)
@@ -65,7 +65,7 @@ router.post("/override", verifyToken, async (req, res) => {
                     VALUES (@user_id, @device_id, @mode, @expire_time)
             `);
 
-        // 2. Ghi nhận ActivityLog
+        // Ghi nhận ActivityLog
         await pool.request()
             .input("device_id", sql.Int, device_id)
             .input("mode", sql.NVarChar, mode)
@@ -75,7 +75,7 @@ router.post("/override", verifyToken, async (req, res) => {
                 VALUES (@device_id, @mode, @source)
             `);
         
-        // 3. Truy vấn loại thiết bị để gửi đúng lệnh MQTT
+        // Truy vấn loại thiết bị để gửi đúng lệnh MQTT
         const devRes = await pool.request()
             .input("device_id", sql.Int, device_id)
             .query("SELECT type FROM Device WHERE id = @device_id");

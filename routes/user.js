@@ -30,7 +30,7 @@ router.get("/", verifyToken, requireAdmin, async (req, res) => {
 // ==========================================
 router.get("/profile", verifyToken, async (req, res) => {
     try {
-        const userId = req.user.id; // Lấy ID từ Token đã giải mã
+        const userId = req.user.id;
 
         const result = await pool.request()
             .input("id", sql.Int, userId)

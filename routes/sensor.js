@@ -3,8 +3,9 @@ import pool, { sql } from "../db.js";
 import { verifyToken, requireAdmin } from "../middleware/auth.js";
 
 const router = express.Router();
+
 // =======================
-// GET Lấy tất cả cảm biến (Admin & Owner)
+// GET Lấy tất cả cảm biến
 // =======================
 router.get("/", verifyToken, async (req, res) => {
     const userRole = req.user.role;
@@ -31,6 +32,7 @@ router.get("/", verifyToken, async (req, res) => {
         res.status(500).json({ error: "Lỗi server nội bộ" });
     }
 });
+
 // =======================
 // GET Dữ liệu mới nhất theo Khu vực
 // =======================
