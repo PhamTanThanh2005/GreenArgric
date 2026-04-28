@@ -265,9 +265,9 @@ Mô tả: Đăng ký một thiết bị cảm biến mới vào danh mục quả
 Nhận vào (Body JSON):
 ```json
 {
-  "name": "Cảm biến Ánh sáng Lux",
-  "type": "light_sensor",
-  "area_id": 2
+  "name": "Cảm biến Ánh sáng A1",
+  "type": "light",
+  "area_id": 1
 }
 ```
 Trả về (Success 200):
@@ -282,9 +282,9 @@ Endpoint: ```PUT /sensor/:id```
 Nhận vào (Body JSON):
 ```json
 {
-  "name": "Cảm biến Nhiệt độ v2",
-  "type": "temperature",
-  "area_id": 2
+  "name": "Cảm biến Nhiệt độ A1",
+  "type": "temp",
+  "area_id": 1
 }
 ```
 Trả về (Success 200):
