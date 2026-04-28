@@ -13,4 +13,16 @@ axiosClient.interceptors.request.use((config) => {
   return config;
 });
 
+
+axiosClient.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response && error.response.status === 401) {
+      console.warn("Token hết hạn hoặc không hợp lệ. Đang chuyển hướng về Login...");
+      localStorage.removeItem('token');
+      window.location.href = '/login'; 
+    }
+    return Promise.reject(error);
+  }
+);
 export default axiosClient;

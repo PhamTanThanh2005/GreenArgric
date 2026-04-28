@@ -86,9 +86,9 @@ export const SubNav: React.FC = () => {
 
         {/* Menu thả xuống */}
         {isDropdownOpen && (
-          <div className="absolute top-full right-0 mt-2 w-56 bg-white rounded-xl shadow-lg border border-gray-100 py-2 z-50 overflow-hidden">
+          <div className="absolute top-full right-0 mt-2 w-56 bg-white rounded-xl shadow-2xl border-2 border-brand-green py-2 z-50 overflow-hidden">
             <div className="px-4 py-2 border-b border-gray-50 mb-1">
-              <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Danh sách phân khu</p>
+              <p className="text-sm font-bold text-brand-green uppercase tracking-wider">Danh sách phân khu</p>
             </div>
             
             {ZONES.map((zone) => (

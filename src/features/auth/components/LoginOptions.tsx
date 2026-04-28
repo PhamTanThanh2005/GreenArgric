@@ -20,13 +20,13 @@ export const LoginOptions: React.FC = () => {
       {/* HIỂN THỊ DANH SÁCH VAI TRÒ */}
       <div className="w-full space-y-4 mt-4">
         <button 
-          onClick={() => handleSelectRole('Chủ vườn')}
+          onClick={() => handleSelectRole('owner')}
           className="w-full py-3.5 text-base bg-white text-[#1b5e3a] border-2 border-[#1b5e3a] rounded hover:bg-[#f0fdf4] font-semibold transition-colors"
         >
           Chủ vườn / Quản lý nhà kính
         </button>
         <button 
-          onClick={() => handleSelectRole('Quản trị viên')}
+          onClick={() => handleSelectRole('admin')}
           className="w-full py-3.5 text-base bg-white text-[#1b5e3a] border-2 border-[#1b5e3a] rounded hover:bg-[#f0fdf4] font-semibold transition-colors"
         >
           Quản trị viên

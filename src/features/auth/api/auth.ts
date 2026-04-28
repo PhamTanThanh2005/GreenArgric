@@ -3,18 +3,17 @@
 export interface LoginCredentials {
   username: string;
   password: string;
-  // Xóa thuộc tính role ở đây vì API backend không yêu cầu
 }
 
 export interface UserInfo {
   id: number;
   name: string;
-  role: string; // Sẽ là "owner" hoặc "admin"
+  role: string;
 }
 
 export interface LoginResponse {
   message: string;
-  access_token: string; // Backend trả về thẳng access_token
+  access_token: string;
   user: UserInfo;
 }
 
@@ -24,13 +23,12 @@ export const loginUser = async (credentials: LoginCredentials): Promise<LoginRes
     headers: {
       'Content-Type': 'application/json',
     },
-    body: JSON.stringify(credentials), // Chỉ gửi username và password
+    body: JSON.stringify(credentials),
   });
 
   const data = await response.json();
 
   if (!response.ok) {
-    // Quăng lỗi để bên LoginForm.tsx bắt (catch) được
     throw new Error(data.message || 'Tài khoản hoặc mật khẩu không chính xác!');
   }
 

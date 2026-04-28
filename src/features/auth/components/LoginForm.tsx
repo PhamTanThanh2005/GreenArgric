@@ -4,10 +4,9 @@ import React, { useState } from 'react';
 import { Eye, EyeOff } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { loginUser } from '../api/auth'; 
-// Đã xóa import axios vì API ở auth.ts đang dùng fetch
 
 interface LoginFormProps {
-  role: string; // Role này (Chủ vườn / Quản trị viên) chỉ dùng để hiển thị text trên UI
+  role: string;
 }
 
 export const LoginForm: React.FC<LoginFormProps> = ({ role }) => {
@@ -25,26 +24,24 @@ export const LoginForm: React.FC<LoginFormProps> = ({ role }) => {
     setIsLoading(true);
 
     try {
-      // Chỉ truyền username và password xuống API
       const data = await loginUser({ username, password });
 
-      // Lưu thông tin cần thiết vào Local Storage
-      localStorage.setItem('access_token', data.access_token);
+      console.log("Dữ liệu Backend trả về:", data);
+      
+      localStorage.setItem('token', data.token);
       localStorage.setItem('role', data.user.role); 
-      localStorage.setItem('user_name', data.user.name); // Lưu thêm tên để hiển thị "Xin chào, Nguyễn Văn A" ở Dashboard
+      localStorage.setItem('user_name', data.user.username);
 
-      // Điều hướng dựa trên role từ Backend trả về
       const userRole = data.user.role; 
       if (userRole === 'owner') {
         navigate('/dashboard'); 
       } else if (userRole === 'admin') {
         navigate('/admin-dashboard'); 
       } else {
-        navigate('/dashboard'); // Mặc định
+        navigate('/dashboard'); 
       }
 
     } catch (err: unknown) {
-      // Vì auth.ts dùng fetch và throw Error, ta chỉ cần bắt Error thông thường
       if (err instanceof Error) {
         setError(err.message);
       } else {
