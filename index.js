@@ -1,30 +1,35 @@
-import express from "express"
-import sensorRouter from "./routes/sensor.js"
-import thresholdRouter from "./routes/threshold.js"
-import authRouter from "./routes/auth.js"
-import reminder from "./routes/reminder.js"
-import divice from "./routes/device.js"
+import express from "express";
+import cors from "cors";
 
-import "./mqtt.js"
-import "./core/check.js"
-import cors from 'cors';
+import sensorRouter from "./routes/sensor.js";
+import thresholdRouter from "./routes/threshold.js";
+import authRouter from "./routes/auth.js";
+import notificationRouter from "./routes/notification.js"; 
+import deviceRouter from "./routes/device.js";
+import areaRouter from "./routes/area.js"; 
+import userRouter from "./routes/user.js";
 
-const app = express()
+import "./mqtt.js";
+
+const app = express();
 
 app.use(cors({
-    origin: 'http://localhost:5173', // Cho phép Frontend của bạn
+    origin: 'http://localhost:5173', // Cho phép Frontend
     methods: ['GET', 'POST', 'PUT', 'DELETE'],
     credentials: true
 }));
 
-app.use(express.json())
+app.use(express.json());
 
-app.use("/sensor", sensorRouter)
-app.use("/threshold", thresholdRouter)
-app.use("/auth", authRouter)
-app.use("/reminder", reminder)
-app.use("/device", divice)
+// Khai báo các endpoint
+app.use("/sensor", sensorRouter);
+app.use("/threshold", thresholdRouter);
+app.use("/auth", authRouter);
+app.use("/notification", notificationRouter);
+app.use("/device", deviceRouter);
+app.use("/area", areaRouter);
+app.use("/user", userRouter);
 
 app.listen(3000, () => {
-    console.log("Server chạy tại http://localhost:3000")
-})
+    console.log("Server chạy tại http://localhost:3000");
+});

@@ -1,186 +1,442 @@
-# BACKEND
+# GREEN ARGRIC - Backend API & MQTT Service
 
-## RUN
+## Kiến trúc & Công nghệ
+- Môi trường chạy: Node.js   
+- Framework: Express.js   
+- Cơ sở dữ liệu: SQL Server (MSSQL)   
+- Giao thức IoT: MQTT (thông qua thư viện mqtt.js)   
+- Xác thực & Bảo mật: JSON Web Token (JWT)
+
+## Yêu cầu hệ thống
+Để khởi chạy dự án tại local, máy tính của bạn cần cài đặt sẵn:
+
+- Node.js (Phiên bản v16.x trở lên)
+- Microsoft SQL Server (Bản Developer hoặc Express)
+- Tài khoản Server MQTT OhStem (Dành cho việc nhận/gửi tín hiệu phần cứng)
+
+## Cài đặt & Khởi chạy
+### Cài đặt các thư viện
+```bash
+npm install
 ```
-npm i
+
+### Khởi tạo Database
+```text
+1. Mở SQL Server Management Studio (SSMS)
+2. Tạo một Database mới có tên là green-farm (hoặc tên tuỳ chọn).
+3. Chạy file script SQL tổng hợp để khởi tạo các bảng.
+```
+### Khởi chạy Server
+```bash
 node index.js
 ```
+Server sẽ mặc định chạy tại: http://localhost:3000
 
-## API
-- /auth
-    - POST: /login. 
-        - Truyền vào body 
-            ``` json
-                {
-                    "username": "owner1",
-                    "password": "123"
-                }
-            ```
-        - Trả về
-            ```json
-                {
-                    "message": "Login thành công",
-                    "user": {
-                        "id": 1,
-                        "name": "Nguyễn Văn A",
-                        "role": "owner"
-                    }
-                }
-            ```
+## Cấu hình Biến môi trường (.env)
+Tạo một file .env ở thư mục gốc của dự án và cấu hình các thông số sau:
+```bash
+# SERVER CONFIG
+PORT=3000
+JWT_SECRET=your_super_secret_jwt_key_here
 
-- /sensor
-    - GET: không có gì. Lấy cái mới nhất của từng type device
-        - Trả về
-            ``` json
-                [
-                    {
-                        "type": "soil_moisture",
-                        "value": 20,
-                        "time": "2026-03-25T23:25:21.953Z"
-                    },
-                    {
-                        "type": "moisture",
-                        "value": 40,
-                        "time": "2026-03-25T23:25:21.953Z"
-                    }, ...
-                ]
-            ```
-    - GET: /type/:type - Lấy tất cả data theo type 
-        - Trả về
-            ```json
-                [
-                    {
-                        "value": 27,
-                        "time": "2026-03-29T09:57:47.886Z"
-                    }, ...
-                ]
-            ```
-    - POST: không có gì - Để test truyền dữ liệu vào sensor cụ thể. Truyền vào body
-        - Trả về
-            ``` json
-                {
-                    "sensor_id": 2,
-                    "value": 1000
-                }
-            ```
+# DATABASE CONFIG (SQL SERVER)
+DB_USER=sa
+DB_PASSWORD=your_sql_password
+DB_SERVER=127.0.0.1
+DB_PORT=1433
+DB_NAME=green-farm
 
-- /threshold
-    - POST: Không có gì
-        - Truyền vào header
-            ```json
-                {
-                    "role": "admin",
-                    "user_id": 2
-                }
-            ```
-        - Truyền vào body
-            ```json
-                {
-                    "device_id": 2,
-                    "sensor_type": "temp",
-                    "min_value": 20,
-                    "max_value": 100
-                }
-            ```
-        - Trả về 
-            ```json
-                message: "Inserted + processed successfully"
-            ```
+# MQTT CONFIG (OHSTEM)
+MQTT_BROKER=wss://mqtt.ohstem.vn:8084/mqtt
+MQTT_USERNAME=MinhTriDADN
+MQTT_PASSWORD=
+MQTT_FEED=MinhTriDADN/feeds
+```
 
-- /reminder
-    - GET: Không có gì
-        - Truyền vào header
-            ```json
-                {
-                    "role": "owner",
-                    "user_id": 1
-                }
-        - Trả về
-            ```json
-                [
-                    {
-                        "id": 878,
-                        "description": "Sensor soil_moisture dưới ngưỡng (30) -> pump ON",
-                        "time": "2026-03-29T14:02:51.160Z"
-                    }, ...
-                ]
-            ```
-    - POST: /:id - Để đánh dấu là đã đọc và không hiện thị nữa
-        - Truyền vào header
-            ```json
-                {
-                    "role": "owner",
-                    "user_id": 1
-                }
-            ```
-        - Trả về
-            ```json
-                {
-                    "message": "Reminder marked as done"
-                }
-            ```
+## Bảng tóm tắt các endpoint trong hệ thốn
 
-- /device
-    - GET: Không có gì
-        - Truyền vào header
-            ```json
-                {
-                    "role": "owner",
-                    "user_id": 1
-                }
-            ```
-        - Trả về
-            ```json
-                [
-                    {
-                        "id": 1,
-                        "type": "pump"
-                    },
-                    {
-                        "id": 2,
-                        "type": "light"
-                    }
-                ]
-            ```
-    - POST: /override - Người dùng bật tắt thủ công
-        - Truyền vào header 
-            ```json
-                {
-                    "role": "owner",
-                    "user_id": 1
-                }
-            ```
-        - Truyền vào body
-            ```json
-                {
-                    "device_id": 1,
-                    "mode": "OFF",
-                    "expire_time": "2026-03-29T13:50:00"
-                }
-            ```
-        - Trả về 
-            ```json
-                {
-                    "message": "Manual override created"
-                }
-            ```
+#### Authentication
+| Method | Endpoint       | Auth | 
+|--------|----------------|------|
+| POST   | /auth/login    | ❌   | 
 
-=> Lỗi thì trả về "error": "..."
 
-=> Thành công thì trả về "message": "..." 
+#### Area
+| Method | Endpoint | Auth | 
+|--------|----------|------|
+| GET    | /area    | ✅   |
 
-## CHECK THRESHOLD 
-### PUMP
-- ON: 
-    - SM < SM_config_min
-    - (SM < SM_config_min + 10 AND temp > temp_config_max)
-    - (SM < SM_config_min + 10 AND RH > RH_config_max) 
-- OFF
-    - SM > SM_config_max
-### LIGHT
-- ON:
-    - LUX < LUX_config_min
-- OFF
-    - LUX > LUX_config_max 
 
+#### Sensor
+| Method | Endpoint                                      | Auth | 
+|--------|----------------------------------------------|------|
+| GET    | /sensor                                     | ✅   |
+| GET    | /sensor/area/:area_id/latest                | ✅   | 
+| GET    | /sensor/area/:area_id/history/:type         | ✅   |
+| POST   | /sensor                                     | ✅   | 
+| PUT    | /sensor/:id                                 | ✅   |
+| DELETE | /sensor/:id                                 | ✅   |
+#### Device
+| Method | Endpoint              | Auth | 
+|--------|----------------------|------|
+| GET    | /device              | ✅   | 
+| POST   | /device/override     | ✅   |
+| POST   | /device              | ✅   |
+| PUT    | /device/:id          | ✅   | 
+| DELETE | /device/:id          | ✅   | 
+
+
+#### Threshold
+| Method | Endpoint     | Auth | 
+|--------|--------------|------|
+| POST   | /threshold   | ✅   | 
+
+
+#### Notification
+| Method | Endpoint        | Auth |
+|--------|----------------|------|
+| GET    | /notification  | ✅   | 
+
+#### User
+| Method | Endpoint         | Auth | 
+|--------|------------------|------|
+| GET    | /user            | ✅   | 
+| GET    | /user/profile    | ✅   | 
+
+## API Document (Endpoints)
+### Quy định chung
+Base URL: http://localhost:3000
+
+Xác thực: Tất cả các API (ngoại trừ Đăng nhập) yêu cầu gắn Token vào Header:
+```
+Authorization: Bearer <JWT_TOKEN>
+```
+
+### Xác thực (Authentication)
+Endpoint: ```POST /auth/login```
+
+Nhận vào (Body JSON):
+```json
+{
+  "username": "admin",
+  "password": "123"
+}
+```
+Trả về (Success 200):
+```json
+{
+    "message": "Đăng nhập thành công",
+    "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwicm9sZSI6ImFkbWluIiwidXNlcm5hbWUiOiJhZG1pbiIsImlhdCI6MTc3NzM2NjQ4NiwiZXhwIjoxNzc3NDUyODg2fQ.M5cnrplOK_VxXwYChiXKYU77RGbPhrZKn_W4SIbfxj4",
+    "user": {
+        "id": 1,
+        "role": "admin",
+        "username": "admin"
+    }
+}
+```
+
+### Khu vực (Area)
+Endpoint: ```GET /area```
+Nhận vào: Header Token.
+Trả về (Success 200): Danh sách khu vực mà người dùng có quyền xem.
+```bash
+[
+  {
+    "id": 1,
+    "name": "Nhà Kính A - Cà Chua",
+    "description": "Khu vực trồng cà chua công nghệ cao"
+  }
+]
+```
+
+### Cảm biến (Sensor)
+#### Lấy tất cả các cảm biến trong hệ thống
+Endpoint: ```GET /sensor/```
+
+Mô tả: Trả về danh sách toàn bộ các cảm biến hiện có trong hệ thống cùng với thông tin khu vực tương ứng.
+
+Trả về (Success 200):
+```json
+[
+    {
+        "id": 10,
+        "sensor_name": "Cảm biến Độ ẩm đất B1",
+        "type": "soil_moisture",
+        "area_id": 2,
+        "area_name": "Nhà Kính B - Dưa Lưới"
+    },
+    {
+        "id": 9,
+        "sensor_name": "Cảm biến Nhiệt độ/Độ ẩm B1",
+        "type": "temp",
+        "area_id": 2,
+        "area_name": "Nhà Kính B - Dưa Lưới"
+    }
+]
+```
+
+#### Lấy dữ liệu mới nhất theo Khu vực
+Endpoint: ```GET /sensor/area/:area_id/latest```
+
+Mô tả: Lấy thông số mới nhất của tất cả cảm biến trong một khu vực (Nhiệt độ, Độ ẩm, Ánh sáng).
+
+Trả về (Success 200):
+```bash
+[
+  {
+    "sensor_id": 1,
+    "sensor_name": "Cảm biến Nhiệt độ A1",
+    "type": "temp",
+    "value": 26.5,
+    "time": "2026-04-28T15:00:00.000Z"
+  }
+]
+```
+#### Lấy lịch sử dữ liệu theo Loại cảm biến
+Endpoint: ```GET /sensor/area/:area_id/history/:type```
+
+Tham số ```:type: temp, moisture, soil_moisture, light.``` 
+
+Trả về (Success 200): Mảng dữ liệu lịch sử để vẽ biểu đồ.
+```bash
+[
+  { "value": 26.5, "time": "2026-04-28T15:00:00Z" },
+  { "value": 26.2, "time": "2026-04-28T14:50:00Z" }
+]
+```
+#### Thêm mới một cảm biến
+Endpoint: ```POST /sensor```
+
+Mô tả: Đăng ký một thiết bị cảm biến mới vào danh mục quản lý của khu vực.
+
+Nhận vào (Body JSON):
+```json
+{
+  "name": "Cảm biến Ánh sáng Lux",
+  "type": "light_sensor",
+  "area_id": 2
+}
+```
+Trả về (Success 200):
+```json
+{
+  "message": "Thêm cảm biến thành công"
+}
+```
+#### Cập nhật thông tin cảm biến
+Endpoint: ```PUT /sensor/:id```
+
+Nhận vào (Body JSON):
+```json
+{
+  "name": "Cảm biến Nhiệt độ v2",
+  "type": "temperature",
+  "area_id": 2
+}
+```
+Trả về (Success 200):
+```json
+{
+  "message": "Cập nhật cảm biến thành công"
+}
+```
+
+#### Xóa cảm biến
+Endpoint: ```DELETE /sensor/:id```
+
+Trả về (Success 200):
+```json
+{
+  "message": "Xóa cảm biến thành công"
+}
+```
+
+### Thiết bị (Device)
+#### Lấy danh sách tất cả các thiết bị trong hệ thống
+
+Endpoint: ```GET /device```
+
+Mô tả: Lấy danh sách thiết bị và trạng thái ON/OFF hiện tại.
+
+Trả về (Success 200):
+```bash
+[
+  {
+    "id": 1,
+    "device_name": "Máy Bơm Khu A",
+    "type": "pump",
+    "status": 1,
+    "area_name": "Nhà Kính A",
+    "mode": "ON",
+    "last_updated": "2026-04-28T15:10:00Z"
+  }
+]
+```
+#### Điều khiển thiết bị thủ công
+Endpoint: ```POST /device/override```
+
+Mô tả: Điều khiển thiết bị thủ công (Ghi đè chế độ tự động).
+
+Nhận vào (Body JSON):
+```bash
+{
+  "device_id": 1,
+  "mode": "ON",
+  "expire_time": "2026-04-28T18:00:00Z"
+}
+```
+Trả về (Success 200):
+```bash
+{ "message": "Gửi lệnh điều khiển thành công" }
+```
+#### Thêm thiết bị mới
+Endpoint: ```POST /device```
+
+Nhận vào (Body JSON):
+```bash
+{
+  "name": "Hệ thống tưới nhỏ giọt",
+  "type": "pump",
+  "area_id": 5,
+  "status": 1
+}
+```
+Trả về (Success 200):
+```bash
+{
+  "message": "Thêm thiết bị thành công"
+}
+```
+#### Cập nhật thông tin thiết bị
+Endpoint: ```PUT device/:id```
+Nhận vào (Body JSON):
+```bash
+{
+  "name": "Bơm tăng áp v2",
+  "type": "pump",
+  "status": 0,
+  "area_id": 4
+}
+```
+Trả về (Success 200):
+```bash
+{
+  "message": "Cập nhật thiết bị thành công"
+}
+```
+
+#### Xóa thiết bị
+Endpoint: ```DELETE device/:id```
+
+Trả về (Success 200):
+```bash
+{
+  "message": "Xóa thiết bị thành công"
+}
+```
+
+
+### Cấu hình Ngưỡng (Threshold)
+Endpoint: ```POST /threshold```
+
+Mô tả: Thiết lập ngưỡng an toàn cho từng loại cảm biến theo khu vực.
+
+Nhận vào (Body JSON):
+```bash
+{
+  "area_id": 1,
+  "sensor_type": "temp",
+  "min_value": 20,
+  "max_value": 30
+}
+```
+Trả về (403 Forbidden):
+```bash
+{
+    "message": "Chỉ quản trị viên mới có quyền này"
+}
+```
+Trả về (Success 200):
+```bash
+{ "message": "Thiết lập ngưỡng thành công" }
+```
+
+### Thông báo (Notification)
+Endpoint: ```GET /notification```
+
+Mô tả: Lấy các cảnh báo khi thông số môi trường vượt ngưỡng.   
+
+Trả về (Success 200):
+```json
+[
+  {
+    "id": 10,
+    "title": "Cảnh báo Nhiệt độ",
+    "message": "Nhiệt độ hiện tại (33°C) vượt ngưỡng cho phép",
+    "type": "WARNING",
+    "created_at": "2026-04-28T15:20:00Z"
+  }
+]
+```
+### Quản lý người dùng
+
+Endpoint: ```GET /user```
+
+Mục đích: Cho phép Admin xem danh sách toàn bộ tài khoản để quản lý nhân sự trong nông trại.
+
+Dữ liệu trả về (JSON):
+``` json
+[
+    {
+        "id": 1,
+        "username": "admin",
+        "name": "Nguyễn Văn A",
+        "email": "admin@greenargric.com",
+        "phone": "0901234567",
+        "role": "admin"
+    },
+    {
+        "id": 2,
+        "username": "owner",
+        "name": "Lê Văn B",
+        "email": "owner@gmail.com",
+        "phone": "0912345678",
+        "role": "owner"
+    }
+]
+```
+
+Endpoint: ```GET /user/profile```
+
+Mục đích: Lấy thông tin của chính người đang đăng nhập để hiển thị trên trang cá nhân.
+
+Cơ chế: Backend tự động nhận diện ```user_id``` từ mã JWT gửi kèm trong Header, đảm bảo tính bảo mật và riêng tư.
+
+Dữ liệu trả về (JSON):
+```json
+{
+    "id": 1,
+    "username": "admin",
+    "name": "Nguyễn Văn A",
+    "email": "admin@greenargric.com",
+    "phone": "0901234567",
+    "role": "admin"
+}
+```
+
+## Luồng xử lý tự động hóa (Auto Control Engine)
+File mqtt.js chạy ngầm như một Background Worker thực hiện các công việc:
+1. Lắng nghe dữ liệu đổ về từ các topic ```V1, V2, V3, V4.```
+2. Lưu vết (Insert) vào cơ sở dữ liệu ```SensorData```.
+3. So sánh giá trị với bảng ```ThresholdConfig``` của khu vực tương ứng.  
+4. Cảnh báo: Nếu vượt ngưỡng, tạo dòng dữ liệu vào Notification.  
+5. Điều khiển tự động: Nếu độ ẩm đất thấp, tự động Publish giá trị 1 xuống Topic của ```Máy bơm (V14)``` để bật nước, đồng thời ghi nhận vào bảng ```ActivityLog```
+
+### Luồng hoạt động
+```
+[Phần cứng IoT] ---> (MQTT Broker) ---> [Node.js Backend] ---> (SQL Server)
+       ^                                      |                      |
+       |                                      v                      v
+       +------------- (MQTT Broker) <---- [Kiểm tra Ngưỡng] <---- (Dashboard Frontend)
+```
 

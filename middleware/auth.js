@@ -1,35 +1,36 @@
-export const mockAuth = (req, res, next) => {
-    const user_id = req.headers["user_id"]
-    const role = req.headers["role"]
+// middleware/auth.js
+import jwt from "jsonwebtoken";
 
-    if (!user_id || !role) {
-        return res.status(401).json({
-            error: "Not logged in yet"
-        })
+const SECRET_KEY = process.env.JWT_SECRET || "your_secret_key";
+
+export const verifyToken = (req, res, next) => {
+    const authHeader = req.headers["authorization"];
+    const token = authHeader && authHeader.split(" ")[1];
+
+    if (!token) {
+        return res.status(401).json({ message: "Bạn chưa đăng nhập!" });
     }
 
-    req.user = {
-        id: parseInt(user_id),
-        role: role
+    try {
+        const decoded = jwt.verify(token, SECRET_KEY);
+        // Lưu thông tin giải mã vào req.user (gồm id, role, username)
+        req.user = decoded; 
+        next();
+    } catch (err) {
+        return res.status(403).json({ message: "Phiên đăng nhập hết hạn hoặc không hợp lệ!" });
     }
-
-    next()
-}
+};
 
 export const requireAdmin = (req, res, next) => {
-    if (req.user.role !== "admin") {
-        return res.status(403).json({
-            error: "Only admins can perform this action"
-        })
+    if (req.user?.role !== "admin") {
+        return res.status(403).json({ message: "Chỉ quản trị viên mới có quyền này" });
     }
-    next()
-}
+    next();
+};
 
 export const requireOwner = (req, res, next) => {
-    if (req.user.role !== "owner") {
-        return res.status(403).json({
-            error: "Only owners can perform this action"
-        })
+    if (req.user?.role !== "owner") {
+        return res.status(403).json({ message: "Chỉ chủ nông trại mới có quyền này" });
     }
-    next()
-}
+    next();
+};

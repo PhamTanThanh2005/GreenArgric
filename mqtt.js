@@ -1,82 +1,143 @@
-import mqtt from "mqtt"
-import pool, { sql } from "./db.js"
-import "dotenv/config"
+import mqtt from "mqtt";
+import pool, { sql } from "./db.js";
+import "dotenv/config";
+import { CONTROL_PUMP, CONTROL_LIGHT } from "./core/const.js";
 
 // ===== MQTT CONFIG =====
 export const client = mqtt.connect(process.env.MQTT_BROKER || "wss://mqtt.ohstem.vn:8084/mqtt", {
     username: process.env.MQTT_USERNAME || "MinhTriDADN",
     password: process.env.MQTT_PASSWORD || "",
     clientId: "server_" + Math.random().toString(16).substring(2, 10)
-})
+});
 
-const SENSOR_RT = `${process.env.MQTT_FEED || "MinhTriDADN/feeds"}/V1` // cảm biến nhiệt
-const SENSOR_RH = `${process.env.MQTT_FEED || "MinhTriDADN/feeds"}/V2` // cảm biến độ ẩm kk
-const SENSOR_SM = `${process.env.MQTT_FEED || "MinhTriDADN/feeds"}/V3` // cảm biến độ ẩm đất
-const SENSOR_LUX = `${process.env.MQTT_FEED || "MinhTriDADN/feeds"}/V4` // cảm biến ánh sáng
+const SENSOR_RT = `${process.env.MQTT_FEED || "MinhTriDADN/feeds"}/V1`; // Nhiệt độ
+const SENSOR_RH = `${process.env.MQTT_FEED || "MinhTriDADN/feeds"}/V2`; // Độ ẩm kk
+const SENSOR_SM = `${process.env.MQTT_FEED || "MinhTriDADN/feeds"}/V3`; // Độ ẩm đất
+const SENSOR_LUX = `${process.env.MQTT_FEED || "MinhTriDADN/feeds"}/V4`; // Ánh sáng
 
-// ===== CONNECT =====
 client.on("connect", () => {
-    // CONSOLE
-    console.log("\x1b[32m%s\x1b[0m", "MQTT Backend connected")
+    console.log("\x1b[32m%s\x1b[0m", " MQTT Backend connected");
+    client.subscribe([SENSOR_RT, SENSOR_RH, SENSOR_SM, SENSOR_LUX], (err) => {
+        if (err) console.error("\x1b[31mSubscribe error:\x1b[0m", err);
+        else console.log("Đã subscribe các topic cảm biến");
+    });
+});
 
-    client.subscribe(SENSOR_RT, (err) => {
-        if (err) console.error("\x1b[31mSubscribe error:\x1b[0m", err)
-        else console.log("Subscribed to sensor topic:", SENSOR_RT)
-    })
-
-    client.subscribe(SENSOR_RH, (err) => {
-        if (err) console.error("\x1b[31mSubscribe error:\x1b[0m", err)
-        else console.log("Subscribed to sensor topic:", SENSOR_RH)
-    })
-
-    client.subscribe(SENSOR_SM, (err) => {
-        if (err) console.error("\x1b[31mSubscribe error:\x1b[0m", err)
-        else console.log("Subscribed to sensor topic:", SENSOR_SM)
-    })
-
-    client.subscribe(SENSOR_LUX, (err) => {
-        if (err) console.error("\x1b[31mSubscribe error:\x1b[0m", err)
-        else console.log("Subscribed to sensor topic:", SENSOR_LUX)
-    })
-})
-
-// ===== HANDLE MESSAGE =====
+// ===== XỬ LÝ MESSAGE & LOGIC TỰ ĐỘNG =====
 client.on("message", async (topic, message) => {
-    let sensor_id
+    let sensor_id;
+    const value = parseFloat(message.toString());
 
-    if (topic === SENSOR_RT) {
-        sensor_id = 1   // nhiệt độ
-    } else if (topic === SENSOR_RH) {
-        sensor_id = 3   // độ ẩm kk
-    } else if (topic === SENSOR_SM) {
-        sensor_id = 4   // độ ẩm đất
-    } else if (topic === SENSOR_LUX) {
-        sensor_id = 2   // ánh sáng
-    } else {
-        console.warn("\x1b[33mReceived message on unknown topic:\x1b[0m", topic)
-        return
-    }
+    // Map topic với ID cảm biến (Giả sử các cảm biến này đang cắm ở Khu A - ID=1)
+    if (topic === SENSOR_RT) sensor_id = 1;
+    else if (topic === SENSOR_RH) sensor_id = 3; 
+    else if (topic === SENSOR_SM) sensor_id = 2; // Trong file SQL mock data, ẩm đất là 2
+    else if (topic === SENSOR_LUX) sensor_id = 4;
+    else return;
 
-    // Value
-    const value = parseFloat(message.toString())
-    console.log(`Sensor ${sensor_id} value:`, value)
-
-    // Insert into DB
     try {
-        // Insert SensorData
+        // 1. Lưu vào Database (SensorData)
         await pool.request()
             .input("sensor_id", sql.Int, sensor_id)
             .input("value", sql.Float, value)
-            .query(`
-                INSERT INTO SensorData(sensor_id, value)
-                VALUES (@sensor_id, @value)
-            `)
-        // Cleanup expired manual overrides
-        await pool.request().query(`
-            DELETE FROM ManualOverride
-            WHERE expire_time < GETDATE()
-        `)
+            .query("INSERT INTO SensorData(sensor_id, value) VALUES (@sensor_id, @value)");
+
+        // 2. Lấy thông tin Area và Sensor Type để chuẩn bị check ngưỡng
+        const sensorInfo = await pool.request()
+            .input("sensor_id", sql.Int, sensor_id)
+            .query("SELECT area_id, type, name FROM Sensor WHERE id = @sensor_id");
+            
+        if (sensorInfo.recordset.length === 0) return;
+        const { area_id, type: sensor_type, name: sensor_name } = sensorInfo.recordset[0];
+
+        // 3. Lấy Ngưỡng (Threshold) của khu vực này
+        const threshold = await pool.request()
+            .input("area_id", sql.Int, area_id)
+            .input("sensor_type", sql.NVarChar, sensor_type)
+            .query("SELECT min_value, max_value FROM ThresholdConfig WHERE area_id = @area_id AND sensor_type = @sensor_type");
+
+        if (threshold.recordset.length > 0) {
+            const { min_value, max_value } = threshold.recordset[0];
+
+            // ----------------------------------------------------
+            // UC3: CẢNH BÁO VƯỢT NGƯỠNG
+            // ----------------------------------------------------
+            if (value > max_value || value < min_value) {
+                // Lấy danh sách Owner của khu vực để gửi thông báo
+                const owners = await pool.request()
+                    .input("area_id", sql.Int, area_id)
+                    .query("SELECT user_id FROM User_Area WHERE area_id = @area_id");
+
+                for (let owner of owners.recordset) {
+                    await pool.request()
+                        .input("user_id", sql.Int, owner.user_id)
+                        .input("title", sql.NVarChar, `Cảnh báo ${sensor_name}`)
+                        .input("message", sql.NVarChar, `Giá trị ${value} đã vượt ngưỡng an toàn (${min_value} - ${max_value})`)
+                        .input("type", sql.NVarChar, "WARNING")
+                        .query(`
+                            INSERT INTO Notification (user_id, title, message, type)
+                            VALUES (@user_id, @title, @message, @type)
+                        `);
+                }
+            }
+
+            // ----------------------------------------------------
+            // UC5: ĐIỀU KHIỂN TỰ ĐỘNG
+            // ----------------------------------------------------
+            // Xóa các lệnh Manual Override đã hết hạn
+            await pool.request().query("DELETE FROM ManualOverride WHERE expire_time < GETDATE()");
+
+            // TỰ ĐỘNG BẬT BƠM NẾU ĐẤT KHÔ
+            if (sensor_type === 'soil_moisture' && value < min_value) {
+                await autoControlDevice(area_id, 'pump', 'ON', CONTROL_PUMP, '1');
+            }
+            // TỰ ĐỘNG TẮT BƠM NẾU ĐẤT ĐÃ ĐỦ ẨM
+            else if (sensor_type === 'soil_moisture' && value >= max_value) {
+                await autoControlDevice(area_id, 'pump', 'OFF', CONTROL_PUMP, '0');
+            }
+
+            // (Tương tự, bạn có thể tự viết thêm logic bật/tắt đèn ở đây nếu ánh sáng thấp)
+        }
+
     } catch (error) {
-        console.error("\x1b[31mError inserting sensor data:\x1b[0m", error)
+        console.error("\x1b[31mError processing MQTT message:\x1b[0m", error);
     }
-})
+});
+
+// Hàm hỗ trợ điều khiển thiết bị tự động
+async function autoControlDevice(area_id, device_type, mode, mqtt_topic, mqtt_payload) {
+    // Tìm thiết bị trong khu vực
+    const deviceResult = await pool.request()
+        .input("area_id", sql.Int, area_id)
+        .input("type", sql.NVarChar, device_type)
+        .query("SELECT id FROM Device WHERE area_id = @area_id AND type = @type AND status = 1");
+
+    if (deviceResult.recordset.length === 0) return;
+    const device_id = deviceResult.recordset[0].id;
+
+    // KIỂM TRA OVERRIDE: Nếu thiết bị này đang bị điều khiển bằng tay thì KHÔNG được phép tự động can thiệp
+    const overrideCheck = await pool.request()
+        .input("device_id", sql.Int, device_id)
+        .query("SELECT * FROM ManualOverride WHERE device_id = @device_id");
+
+    if (overrideCheck.recordset.length > 0) return; // Bỏ qua tự động
+
+    // Tránh gửi lệnh MQTT liên tục trùng lặp (nếu đã ON thì không ON nữa)
+    const lastState = await pool.request()
+        .input("device_id", sql.Int, device_id)
+        .query("SELECT TOP 1 mode FROM ActivityLog WHERE device_id = @device_id ORDER BY time DESC");
+
+    if (lastState.recordset.length > 0 && lastState.recordset[0].mode === mode) return;
+
+    // 1. Publish MQTT
+    client.publish(mqtt_topic, mqtt_payload, { retain: true });
+
+    // 2. Ghi Log
+    await pool.request()
+        .input("device_id", sql.Int, device_id)
+        .input("mode", sql.NVarChar, mode)
+        .input("source", sql.NVarChar, "auto")
+        .query("INSERT INTO ActivityLog (device_id, mode, source) VALUES (@device_id, @mode, @source)");
+    
+    console.log(`[AUTO] Đã ${mode} ${device_type} ở Khu vực ${area_id}`);
+}

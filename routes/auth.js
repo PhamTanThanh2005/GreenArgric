@@ -1,52 +1,58 @@
-import express from "express"
-import pool, { sql } from "../db.js"
+// routes/auth.js
+import express from "express";
+import pool, { sql } from "../db.js";
+import jwt from "jsonwebtoken";
 
-const router = express.Router()
+const router = express.Router();
+const SECRET_KEY = process.env.JWT_SECRET || "your_secret_key";
 
-// =======================
-// LOGIN
-// =======================
 router.post("/login", async (req, res) => {
-    const { username, password } = req.body
+    console.log("BODY:", req.body); 
+    const { username, password } = req.body;
 
     if (!username || !password) {
-        return res.status(400).json({
-            error: "Missing username or password"
-        })
+        return res.status(400).json({ message: "Vui lòng nhập đầy đủ tài khoản và mật khẩu!" });
     }
 
     try {
         const result = await pool.request()
             .input("username", sql.NVarChar, username)
-            .input("password", sql.NVarChar, password)
             .query(`
-                SELECT id, name, role
-                FROM [User]
-                WHERE username = @username AND password = @password
-            `)
+                SELECT id, username, password, role 
+                FROM [User] 
+                WHERE username = @username
+            `);
 
-        if (result.recordset.length === 0) {
-            return res.status(401).json({
-                error: "Sai tài khoản hoặc mật khẩu"
-            })
+        const user = result.recordset[0];
+
+        if (!user || password !== user.password) {
+            return res.status(401).json({ message: "Sai tài khoản hoặc mật khẩu!" });
         }
 
-        const user = result.recordset[0]
+        const token = jwt.sign(
+            { 
+                id: user.id, 
+                role: user.role, 
+                username: user.username 
+            },
+            SECRET_KEY,
+            { expiresIn: "1d" }
+        );
 
-        res.json({
-            message: "Login successful",
-            user: {
-                id: user.id,
-                name: user.name,
-                role: user.role
+        res.status(200).json({
+            message: "Đăng nhập thành công",
+            token,
+            user: { 
+                id: user.id, 
+                role: user.role, 
+                username: user.username 
             }
-        })
+        });
 
-    } catch (err) {
-        res.status(500).json({
-            error: err.message
-        })
+    } catch (error) {
+        console.error("Lỗi đăng nhập:", error);
+        res.status(500).json({ message: "Lỗi server nội bộ!" });
     }
-})
+});
 
-export default router
+export default router;
