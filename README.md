@@ -108,6 +108,18 @@ MQTT_FEED=MinhTriDADN/feeds
 | GET    | /user/profile    | ✅   | 
 
 ## API Document (Endpoints)
+Hệ thống Backend cung cấp tài liệu API tương tác thông qua Swagger UI, giúp developer dễ dàng kiểm thử và tích hợp.
+
+### Truy cập Swagger UI
+Sau khi khởi chạy server, truy cập tại:
+```bash
+http://localhost:3000/api
+```
+Swagger UI cung cấp:
+- Danh sách đầy đủ các endpoint
+- Mô tả request/response
+- Test API trực tiếp trên trình duyệt
+
 ### Quy định chung
 Base URL: http://localhost:3000
 
@@ -115,6 +127,7 @@ Xác thực: Tất cả các API (ngoại trừ Đăng nhập) yêu cầu gắn 
 ```
 Authorization: Bearer <JWT_TOKEN>
 ```
+
 
 ### Xác thực (Authentication)
 Endpoint: ```POST /auth/login```

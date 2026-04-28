@@ -1,0 +1,212 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "GREEN AGRIC API",
+    "version": "1.0.0",
+    "description": "Backend API & MQTT Service cho hệ thống nông nghiệp thông minh"
+  },
+  "servers": [
+    {
+      "url": "http://localhost:3000"
+    }
+  ],
+  "components": {
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      }
+    }
+  },
+  "security": [
+    { "bearerAuth": [] }
+  ],
+  "paths": {
+
+    "/auth/login": {
+      "post": {
+        "summary": "Đăng nhập",
+        "security": [],
+        "tags": ["Authentication"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "username": { "type": "string" },
+                  "password": { "type": "string" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Đăng nhập thành công" }
+        }
+      }
+    },
+
+    "/area": {
+      "get": {
+        "summary": "Lấy danh sách khu vực",
+        "tags": ["Area"],
+        "responses": { "200": { "description": "OK" } }
+      },
+      "post": {
+        "summary": "Thêm khu vực",
+        "tags": ["Area"],
+        "responses": { "200": { "description": "Created" } }
+      }
+    },
+
+    "/area/{id}": {
+      "put": {
+        "summary": "Cập nhật khu vực",
+        "tags": ["Area"],
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "integer" } }
+        ],
+        "responses": { "200": { "description": "Updated" } }
+      },
+      "delete": {
+        "summary": "Xóa khu vực",
+        "tags": ["Area"],
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "integer" } }
+        ],
+        "responses": { "200": { "description": "Deleted" } }
+      }
+    },
+
+    "/sensor": {
+      "get": {
+        "summary": "Lấy tất cả cảm biến",
+        "tags": ["Sensor"],
+        "responses": { "200": { "description": "OK" } }
+      },
+      "post": {
+        "summary": "Thêm cảm biến",
+        "tags": ["Sensor"],
+        "responses": { "200": { "description": "Created" } }
+      }
+    },
+
+    "/sensor/{id}": {
+      "put": {
+        "summary": "Cập nhật cảm biến",
+        "tags": ["Sensor"],
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "integer" } }
+        ],
+        "responses": { "200": { "description": "Updated" } }
+      },
+      "delete": {
+        "summary": "Xóa cảm biến",
+        "tags": ["Sensor"],
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "integer" } }
+        ],
+        "responses": { "200": { "description": "Deleted" } }
+      }
+    },
+
+    "/sensor/area/{area_id}/latest": {
+      "get": {
+        "summary": "Dữ liệu cảm biến mới nhất theo khu vực",
+        "tags": ["Sensor"],
+        "parameters": [
+          { "name": "area_id", "in": "path", "required": true, "schema": { "type": "integer" } }
+        ],
+        "responses": { "200": { "description": "OK" } }
+      }
+    },
+
+    "/sensor/area/{area_id}/history/{type}": {
+      "get": {
+        "summary": "Lịch sử cảm biến theo loại",
+        "tags": ["Sensor"],
+        "parameters": [
+          { "name": "area_id", "in": "path", "required": true, "schema": { "type": "integer" } },
+          { "name": "type", "in": "path", "required": true, "schema": { "type": "string" } }
+        ],
+        "responses": { "200": { "description": "OK" } }
+      }
+    },
+
+    "/device": {
+      "get": {
+        "summary": "Lấy danh sách thiết bị",
+        "tags": ["Device"],
+        "responses": { "200": { "description": "OK" } }
+      },
+      "post": {
+        "summary": "Thêm thiết bị",
+        "tags": ["Device"],
+        "responses": { "200": { "description": "Created" } }
+      }
+    },
+
+    "/device/{id}": {
+      "put": {
+        "summary": "Cập nhật thiết bị",
+        "tags": ["Device"],
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "integer" } }
+        ],
+        "responses": { "200": { "description": "Updated" } }
+      },
+      "delete": {
+        "summary": "Xóa thiết bị",
+        "tags": ["Device"],
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "integer" } }
+        ],
+        "responses": { "200": { "description": "Deleted" } }
+      }
+    },
+
+    "/device/override": {
+      "post": {
+        "summary": "Điều khiển thiết bị thủ công",
+        "tags": ["Device"],
+        "responses": { "200": { "description": "OK" } }
+      }
+    },
+
+    "/threshold": {
+      "post": {
+        "summary": "Thiết lập ngưỡng",
+        "tags": ["Threshold"],
+        "responses": { "200": { "description": "OK" } }
+      }
+    },
+
+    "/notification": {
+      "get": {
+        "summary": "Lấy danh sách thông báo",
+        "tags": ["Notification"],
+        "responses": { "200": { "description": "OK" } }
+      }
+    },
+
+    "/user": {
+      "get": {
+        "summary": "Lấy danh sách user",
+        "tags": ["User"],
+        "responses": { "200": { "description": "OK" } }
+      }
+    },
+
+    "/user/profile": {
+      "get": {
+        "summary": "Lấy thông tin user hiện tại",
+        "tags": ["User"],
+        "responses": { "200": { "description": "OK" } }
+      }
+    }
+
+  }
+}

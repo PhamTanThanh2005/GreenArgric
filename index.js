@@ -1,5 +1,6 @@
 import express from "express";
 import cors from "cors";
+import { setupSwagger } from './utils/swagger.js';
 
 import sensorRouter from "./routes/sensor.js";
 import thresholdRouter from "./routes/threshold.js";
@@ -20,6 +21,8 @@ app.use(cors({
 }));
 
 app.use(express.json());
+
+setupSwagger(app);
 
 // Khai báo các endpoint
 app.use("/sensor", sensorRouter);
