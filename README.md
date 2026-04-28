@@ -144,7 +144,7 @@ Trả về (Success 200):
 Endpoint: ```GET /area```
 Nhận vào: Header Token.
 Trả về (Success 200): Danh sách khu vực mà người dùng có quyền xem.
-```bash
+```json
 [
   {
     "id": 1,
@@ -234,7 +234,7 @@ Endpoint: ```GET /sensor/area/:area_id/latest```
 Mô tả: Lấy thông số mới nhất của tất cả cảm biến trong một khu vực (Nhiệt độ, Độ ẩm, Ánh sáng).
 
 Trả về (Success 200):
-```bash
+```json
 [
   {
     "sensor_id": 1,
@@ -312,7 +312,7 @@ Endpoint: ```GET /device```
 Mô tả: Lấy danh sách thiết bị và trạng thái ON/OFF hiện tại.
 
 Trả về (Success 200):
-```bash
+```json
 [
   {
     "id": 1,
@@ -331,7 +331,7 @@ Endpoint: ```POST /device/override```
 Mô tả: Điều khiển thiết bị thủ công (Ghi đè chế độ tự động).
 
 Nhận vào (Body JSON):
-```bash
+```json
 {
   "device_id": 1,
   "mode": "ON",
@@ -339,14 +339,14 @@ Nhận vào (Body JSON):
 }
 ```
 Trả về (Success 200):
-```bash
+```json
 { "message": "Gửi lệnh điều khiển thành công" }
 ```
 #### Thêm thiết bị mới
 Endpoint: ```POST /device```
 
 Nhận vào (Body JSON):
-```bash
+```json
 {
   "name": "Hệ thống tưới nhỏ giọt",
   "type": "pump",
@@ -355,7 +355,7 @@ Nhận vào (Body JSON):
 }
 ```
 Trả về (Success 200):
-```bash
+```json
 {
   "message": "Thêm thiết bị thành công"
 }
@@ -363,7 +363,7 @@ Trả về (Success 200):
 #### Cập nhật thông tin thiết bị
 Endpoint: ```PUT device/:id```
 Nhận vào (Body JSON):
-```bash
+```json
 {
   "name": "Bơm tăng áp v2",
   "type": "pump",
@@ -372,7 +372,7 @@ Nhận vào (Body JSON):
 }
 ```
 Trả về (Success 200):
-```bash
+```json
 {
   "message": "Cập nhật thiết bị thành công"
 }
@@ -382,7 +382,7 @@ Trả về (Success 200):
 Endpoint: ```DELETE device/:id```
 
 Trả về (Success 200):
-```bash
+```json
 {
   "message": "Xóa thiết bị thành công"
 }
@@ -395,7 +395,7 @@ Endpoint: ```POST /threshold```
 Mô tả: Thiết lập ngưỡng an toàn cho từng loại cảm biến theo khu vực.
 
 Nhận vào (Body JSON):
-```bash
+```json
 {
   "area_id": 1,
   "sensor_type": "temp",
@@ -404,13 +404,13 @@ Nhận vào (Body JSON):
 }
 ```
 Trả về (403 Forbidden):
-```bash
+```json
 {
     "message": "Chỉ quản trị viên mới có quyền này"
 }
 ```
 Trả về (Success 200):
-```bash
+```json
 { "message": "Thiết lập ngưỡng thành công" }
 ```
 
