@@ -8,6 +8,7 @@ import { GlobalDashboardPage } from '../pages/GlobalDashboardPage';
 import { FunctionLayout } from '../layouts/FunctionLayout';
 import { ControlDevicePage } from '../pages/ControlDevicePage';
 import { ProfilePage } from '../pages/ProfilePage';
+import { EnvironmentParametersPage } from '../pages/EnvironmentParametersPage';
 
 export const AppRoutes: React.FC = () => {
   return (
@@ -27,6 +28,7 @@ export const AppRoutes: React.FC = () => {
         <Route element={<FunctionLayout />}>
           <Route path="/control-device" element={<ControlDevicePage/>} />
           <Route path="/profile" element={<ProfilePage />} />
+          <Route path="/environment" element={<EnvironmentParametersPage />} />
         </Route>
 
         

@@ -39,6 +39,7 @@ export const SubNav: React.FC = () => {
     const path = location.pathname;
     
     if (path.includes('/control-device')) return 'Điều khiển thiết bị';
+    if (path.includes('/environment')) return 'Thông số môi trường';
     
     const matchedZone = areas.find(z => path.includes(`/zone/${z.id}`));
     if (matchedZone) return matchedZone.name;
