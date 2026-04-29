@@ -37,7 +37,7 @@ export const ProfilePage: React.FC = () => {
   const getRoleName = (role: string) => {
     switch (role.toLowerCase()) {
       case 'admin': return 'Quản trị viên hệ thống';
-    //   case 'owner': return 'Chủ nông trại';
+      case 'owner': return 'Chủ nông trại';
     //   case 'staff': return 'Nhân viên vận hành';
       default: return role;
     }
