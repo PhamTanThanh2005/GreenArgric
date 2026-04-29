@@ -1,48 +1,26 @@
 // src/features/device/api/deviceApi.ts
-
-const API_URL = 'http://localhost:3000';
-
-const getHeaders = () => {
-  return {
-    'Content-Type': 'application/json',
-    'role': 'owner',
-    'user_id': '1'
-  };
-};
+import axiosClient from '../../../services/axiosClient';
 
 export const fetchDevices = async () => {
   try {
-    const response = await fetch(`${API_URL}/device`, {
-      method: 'GET',
-      headers: getHeaders()
-    });
-    
-    if (!response.ok) throw new Error('Lỗi lấy danh sách thiết bị');
-    
-    return await response.json();
+    const response = await axiosClient.get('/device');
+    return response.data;
   } catch (error) {
-    console.error(error);
-    return[];
+    console.error('Lỗi lấy danh sách thiết bị:', error);
+    return [];
   }
 };
 
 export const overrideDevice = async (deviceId: number, mode: 'ON' | 'OFF', expireTime: string) => {
   try {
-    const response = await fetch(`${API_URL}/override`, {
-      method: 'POST',
-      headers: getHeaders(),
-      body: JSON.stringify({
-        device_id: deviceId,
-        mode: mode,
-        expire_time: expireTime
-      })
+    const response = await axiosClient.post('/device/override', {
+      device_id: deviceId,
+      mode: mode,
+      expire_time: expireTime
     });
-
-    if (!response.ok) throw new Error('Lỗi điều khiển thiết bị');
-    
-    return await response.json();
+    return response.data;
   } catch (error) {
-    console.error(error);
+    console.error('Lỗi điều khiển thiết bị:', error);
     throw error;
   }
 };

@@ -14,5 +14,4 @@ export const areaApi = {
     return response.data;
   },
   
-  // Bạn có thể thêm các hàm POST, PUT, DELETE /area ở đây sau này
 };
