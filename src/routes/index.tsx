@@ -7,6 +7,7 @@ import { ZoneDashboardPage } from '../pages/ZoneDashboardPage';
 import { GlobalDashboardPage } from '../pages/GlobalDashboardPage';
 import { FunctionLayout } from '../layouts/FunctionLayout';
 import { ControlDevicePage } from '../pages/ControlDevicePage';
+import { ProfilePage } from '../pages/ProfilePage';
 
 export const AppRoutes: React.FC = () => {
   return (
@@ -25,7 +26,10 @@ export const AppRoutes: React.FC = () => {
 
         <Route element={<FunctionLayout />}>
           <Route path="/control-device" element={<ControlDevicePage/>} />
+          <Route path="/profile" element={<ProfilePage />} />
         </Route>
+
+        
         
         {/* Bắt lỗi 404 - Redirect về home */}
         <Route path="*" element={<Navigate to="/" replace />} />

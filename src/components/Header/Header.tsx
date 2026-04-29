@@ -4,10 +4,6 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Bell, UserCircle, LogOut } from 'lucide-react';
 import { SearchField } from '../SearchField/SearchField';
-// import { Button } from '../Button/Button';
-
-// import { Modal } from '../Modal/Modal';
-// import { LoginForm } from '../../features/auth/components/LoginForm';
 
 export const Header: React.FC = () => {
   const navigate = useNavigate();
@@ -16,16 +12,16 @@ export const Header: React.FC = () => {
   const [isLoggedIn, setIsLoggedIn] = useState<boolean>(
     () => !!localStorage.getItem('token')
   );
-  // const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
+
+  const [username, setUsername] = useState<string | null>(
+    () => localStorage.getItem('username')
+  );
 
   useEffect(() => {
     const checkAuthStatus = () => {
       const token = localStorage.getItem('token');
       setIsLoggedIn(!!token);
-
-      if (token) {
-        // setIsLoginModalOpen(false);
-      }
+      setUsername(localStorage.getItem('username'));
     };
 
     checkAuthStatus();
@@ -45,66 +41,75 @@ export const Header: React.FC = () => {
     localStorage.removeItem('username');
 
     setIsLoggedIn(false);
+    setUsername(null);
 
     window.dispatchEvent(new Event('authChange'));
     navigate('/');
   };
 
+  const handleLogoClick = () => {
+    if (isLoggedIn) {
+      navigate('/dashboard');
+    } else {
+      navigate('/');
+    }
+  };
+
+  const isLandingPage = location.pathname === '/';
+  const showActions = isLoggedIn && !isLandingPage;
+
   return (
     <header className="bg-brand-green text-white px-14 py-2 flex items-center justify-between z-50 shadow-md">
       {/* Logo */}
-      <div className="flex items-center gap-2 cursor-pointer" onClick={() => navigate('/')}>
+      <div className="flex items-center gap-2 cursor-pointer" onClick={handleLogoClick}>
         <div className="w-35">
           <img src="/images/logo.png" alt="Logo" />
         </div>
       </div>
 
-      <div className="flex-1 flex justify-center px-4">
-        <SearchField />
-      </div>
+      {/* Chỉ hiển thị thanh Search khi thỏa mãn điều kiện */}
+      {showActions && (
+        <div className="flex-1 flex justify-center px-4">
+          <SearchField />
+        </div>
+      )}
 
+      {/* Khu vực Nút chức năng */}
       <div className="flex items-center px-2 py-0.5 gap-6">
-        {isLoggedIn ? (
+        {showActions && (
           <>
+            {/* Thông báo */}
             <div className="bg-white rounded-full">
               <button className="p-2 text-brand-green cursor-pointer transition-colors relative flex items-center justify-center">
                 <Bell size={20} strokeWidth={2.5} />
                 <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-brand-red rounded-full border border-white"></span>
               </button>
             </div>
+
+            {/* Profile */}
             <div className="bg-white rounded-full">
-              <button className="px-3 py-2 text-brand-green cursor-pointer transition-colors flex items-center justify-center gap-2">
+              <button
+                onClick={() => navigate('/profile')}
+                className="px-3 py-1.5 text-brand-green cursor-pointer transition-colors flex items-center justify-center gap-2 font-bold hover:bg-gray-50 rounded-full"
+              >
                 <UserCircle size={22} strokeWidth={2.5} />
-              </button>
-            </div>
-            <div className="bg-white rounded-full">
-              <button className="px-4 py-2 text-brand-red font-bold cursor-pointer transition-colors flex items-center gap-2" onClick={handleLogout}>
-                <LogOut size={18} strokeWidth={2.5} />
-                <span>Đăng xuất</span>
+                {username && <span className="text-sm pb-0.5 pr-1">{username}</span>}
               </button>
             </div>
 
-          </>
-        ) : (
-          <>
-            {/* <Button
-              variant="outline-gray"
-              className=" px-10 py-2 text-brand-green font-bold border-0 bg-white rounded-2xl"
-              onClick={() => setIsLoginModalOpen(true)}
-            >
-              Đăng nhập
-            </Button> */}
+            {/* Đăng xuất */}
+            <div className="bg-white rounded-full">
+              <button
+                className="px-4 py-1.5 text-brand-red font-bold cursor-pointer transition-colors flex items-center gap-2 hover:bg-red-50 rounded-full"
+                onClick={handleLogout}
+              >
+                <LogOut size={18} strokeWidth={2.5} />
+                <span className="text-sm pb-0.5">Đăng xuất</span>
+              </button>
+            </div>
           </>
         )}
       </div>
-
-      {/* <Modal
-        isOpen={isLoginModalOpen}
-        onClose={() => setIsLoginModalOpen(false)}
-        className="w-180"
-      >
-        <LoginForm role="owner" />
-      </Modal> */}
     </header>
   );
 };

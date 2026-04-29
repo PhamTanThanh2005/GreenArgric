@@ -1,23 +1,30 @@
+// src/components/Navigation/SubNav.tsx
+
 import React, { useState, useRef, useEffect } from 'react';
 import { Menu, ChevronRight, Map, ChevronDown } from 'lucide-react';
 import { useLocation, Link, useNavigate } from 'react-router-dom';
 import { cn } from '../../utils';
-
-// Danh sách các khu vực để render Dropdown
-const ZONES = [
-  { id: 'zone-a', name: 'Khu A - Dưa lưới' },
-  { id: 'zone-b', name: 'Khu B - Cà chua' },
-  { id: 'zone-c', name: 'Khu C - Rau mầm' },
-  { id: 'zone-d', name: 'Khu D - Dâu tây' },
-];
+import { areaApi, type AreaData } from '../../features/dashboard/api/areaApi';
 
 export const SubNav: React.FC = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const [areas, setAreas] = useState<AreaData[]>([]);
 
-  // Xử lý click ra ngoài để đóng dropdown
+  useEffect(() => {
+    const fetchAreas = async () => {
+      try {
+        const data = await areaApi.getAll();
+        setAreas(data);
+      } catch (error) {
+        console.error("Lỗi khi tải danh sách khu vực ở SubNav:", error);
+      }
+    };
+    fetchAreas();
+  }, []);
+
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
@@ -28,17 +35,15 @@ export const SubNav: React.FC = () => {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  // Hàm phụ trợ tạo tên Breadcrumb dựa vào URL hiện tại
   const getCurrentPageName = () => {
     const path = location.pathname;
     
     if (path.includes('/control-device')) return 'Điều khiển thiết bị';
     
-    // Kiểm tra xem có đang ở trang chi tiết khu vực nào không
-    const matchedZone = ZONES.find(z => path.includes(`/zones/${z.id}`));
+    const matchedZone = areas.find(z => path.includes(`/zone/${z.id}`));
     if (matchedZone) return matchedZone.name;
 
-    return 'Tổng quan Nông trại'; // Mặc định cho /dashboard
+    return 'Tổng quan Nông trại';
   };
 
   return (
@@ -46,7 +51,7 @@ export const SubNav: React.FC = () => {
       
       {/* KHU VỰC TRÁI: Nút Menu & Breadcrumbs */}
       <div className="flex items-center h-full">
-        {/* Nút Hamburger Menu (Giữ nguyên) */}
+        {/* Nút Hamburger Menu */}
         <button className="flex items-center justify-center h-full px-6 hover:bg-gray-200 transition-colors">
           <Menu size={28} className="text-brand-green stroke-[2.5px]" />
         </button>
@@ -84,28 +89,35 @@ export const SubNav: React.FC = () => {
           <ChevronDown size={16} className={cn("transition-transform", isDropdownOpen && "rotate-180")} />
         </button>
 
-        {/* Menu thả xuống */}
+        {/* Menu thả xuống - Render động từ API */}
         {isDropdownOpen && (
           <div className="absolute top-full right-0 mt-2 w-56 bg-white rounded-xl shadow-2xl border-2 border-brand-green py-2 z-50 overflow-hidden">
             <div className="px-4 py-2 border-b border-gray-50 mb-1">
               <p className="text-sm font-bold text-brand-green uppercase tracking-wider">Danh sách phân khu</p>
             </div>
             
-            {ZONES.map((zone) => (
-              <button
-                key={zone.id}
-                onClick={() => {
-                  navigate(`/zones/${zone.id}`);
-                  setIsDropdownOpen(false);
-                }}
-                className={cn(
-                  "w-full text-left px-4 py-2 text-sm font-medium transition-colors hover:bg-gray-50",
-                  location.pathname.includes(zone.id) ? "text-brand-green bg-brand-green/5" : "text-gray-700"
-                )}
-              >
-                {zone.name}
-              </button>
-            ))}
+            {areas.length === 0 ? (
+              <p className="px-4 py-2 text-sm text-gray-400">Đang tải...</p>
+            ) : (
+              areas.map((zone) => {
+                const isActive = location.pathname.includes(`/zone/${zone.id}`) || location.pathname.includes(`/zones/${zone.id}`);
+                return (
+                  <button
+                    key={zone.id}
+                    onClick={() => {
+                      navigate(`/zones/${zone.id}`); 
+                      setIsDropdownOpen(false);
+                    }}
+                    className={cn(
+                      "w-full text-left px-4 py-2 text-sm font-medium transition-colors hover:bg-gray-50",
+                      isActive ? "text-brand-green bg-brand-green/5" : "text-gray-700"
+                    )}
+                  >
+                    {zone.name}
+                  </button>
+                )
+              })
+            )}
           </div>
         )}
       </div>
