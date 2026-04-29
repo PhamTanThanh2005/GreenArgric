@@ -81,7 +81,7 @@ export const ProfilePage: React.FC = () => {
         <div className="col-span-1 flex flex-col gap-6">
           <div className="bg-white rounded-3xl p-8 shadow-sm border border-gray-100 flex flex-col items-center text-center">
             <div className="relative mb-4">
-              <div className="w-32 h-32 bg-gradient-to-tr from-brand-green to-green-300 rounded-full flex items-center justify-center border-4 border-white shadow-xl">
+              <div className="w-32 h-32 bg-linear-to-tr from-brand-green to-green-300 rounded-full flex items-center justify-center border-4 border-white shadow-xl">
                 <User className="w-14 h-14 text-white" />
               </div>
               <div className="absolute bottom-1 right-1 w-6 h-6 bg-green-500 border-2 border-white rounded-full"></div>
