@@ -9,6 +9,7 @@ import notificationRouter from "./routes/notification.js";
 import deviceRouter from "./routes/device.js";
 import areaRouter from "./routes/area.js"; 
 import userRouter from "./routes/user.js";
+import activityLog from './routes/activity.js';
 
 import "./mqtt.js";
 
@@ -32,6 +33,7 @@ app.use("/notification", notificationRouter);
 app.use("/device", deviceRouter);
 app.use("/area", areaRouter);
 app.use("/user", userRouter);
+app.use("/activity", activityLog);
 
 app.listen(3000, () => {
     console.log("Server chạy tại http://localhost:3000");

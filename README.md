@@ -402,6 +402,49 @@ Trả về (Success 200):
 ```
 
 
+
+### Activity Log của thiết bị
+Endpoint: ```GET /activity```
+
+Phân quyền: Admin (thấy tất cả) hoặc Owner (chỉ thấy thiết bị trong khu vực của mình)
+
+Trả về (Success 200): Lấy lịch sử hoạt động của thiết bị
+```json
+[
+  {
+    "id": 25,
+    "device_id": 2,
+    "device_name": "Đèn LED RGB Khu A",
+    "device_type": "light",
+    "mode": "ON",
+    "source": "manual",
+    "time": "2026-04-29T15:23:58.100Z",
+    "area_name": "Nhà Kính A - Cà Chua"
+  }
+]
+```
+Endpoint: ```GET /activity/:device_id```
+
+Trả về (Success 200): Lấy lịch sử theo 1 thiết bị cụ thể
+
+```json
+[
+    {
+        "id": 23,
+        "mode": "ON",
+        "source": "manual",
+        "time": "2026-04-29T15:22:56.986Z"
+    },
+    {
+        "id": 22,
+        "mode": "OFF",
+        "source": "manual",
+        "time": "2026-04-29T15:22:56.160Z"
+    }
+]
+```
+
+
 ### Cấu hình Ngưỡng (Threshold)
 Endpoint: ```POST /threshold```
 
@@ -444,6 +487,7 @@ Trả về (Success 200):
   }
 ]
 ```
+
 ### Quản lý người dùng
 
 Endpoint: ```GET /user```
