@@ -1,150 +1,227 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ThermometerSun, Sprout, Droplets, Sun, ArrowLeft, RefreshCw } from 'lucide-react';
+import { ThermometerSun, Sprout, Droplets, Sun, ArrowLeft, RefreshCw, Cpu, Clock } from 'lucide-react';
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+
+// Components
 import { StatCard } from '../features/dashboard/components/StatCard';
 import { ZoneBannerCard } from '../features/dashboard/components/ZoneBannerCard';
+
+// APIs & Types
+import { areaApi, type AreaData } from '../features/dashboard/api/areaApi';
 import { sensorApi } from '../features/dashboard/api/sensorApi';
-import { areaApi } from '../features/dashboard/api/areaApi'; 
+import { activityApi, type ActivityLog } from '../features/dashboard/api/activityApi';
+import { fetchDevices } from '../features/device/api/deviceApi';
+
+// --- ĐỊNH NGHĨA KIỂU DỮ LIỆU ---
+interface DeviceData {
+  id: number;
+  device_name: string;
+  type: string;
+  status: number;
+  area_name: string;
+  mode: 'ON' | 'OFF';
+  last_updated: string;
+}
+
+interface ChartData {
+  time: string;
+  temp: number;
+}
+
+interface ZoneState {
+  areaInfo: AreaData;
+  sensors: { temp: string; soil: string; humid: string; light: string };
+  devices: DeviceData[];
+  logs: ActivityLog[];
+  history: ChartData[];
+}
 
 export const ZoneDashboardPage: React.FC = () => {
   const { zoneId } = useParams<{ zoneId: string }>();
   const navigate = useNavigate();
+  const [loading, setLoading] = useState<boolean>(true);
 
-  // State lưu thông tin khu vực (Thay thế cho Mock Data)
-  const [areaInfo, setAreaInfo] = useState({ name: 'Đang tải...', description: '...' });
-  const [loading, setLoading] = useState(true);
-
-  // State lưu giá trị cảm biến
-  const [sensorValues, setSensorValues] = useState({
-    temperature: '--',
-    soil_moisture: '--',
-    moisture: '--',
-    light: '--'
+  const [data, setData] = useState<ZoneState>({
+    areaInfo: { id: 0, name: 'Đang tải...', description: '...' },
+    sensors: { temp: '--', soil: '--', humid: '--', light: '--' },
+    devices: [],
+    logs: [],
+    history: []
   });
 
-  useEffect(() => {
+  const loadZoneData = async () => {
     if (!zoneId) return;
+    setLoading(true);
 
-    const fetchAreaInfo = async () => {
-      try {
-        const areas = await areaApi.getAll();
-        const currentArea = areas.find(a => a.id.toString() === zoneId);
-        if (currentArea) {
-          setAreaInfo({
-            name: currentArea.name,
-            description: currentArea.description
-          });
-        } else {
-          setAreaInfo({ name: `Khu vực chưa xác định (${zoneId})`, description: '' });
-        }
-      } catch (error) {
-        console.error("Lỗi khi tải thông tin khu vực:", error);
-      }
-    };
+    try {
+      // 1. Gọi tất cả API cần thiết
+      const [areas, latestSensors, allDevicesRaw, allLogs, tempHistory] = await Promise.all([
+        areaApi.getAll(),
+        sensorApi.getLatestByArea(zoneId),
+        fetchDevices(),
+        activityApi.getAll(),
+        sensorApi.getHistoryByAreaAndType(zoneId, 'temp').catch(() => []) // Catch lỗi nếu chưa có lịch sử
+      ]);
 
-    const fetchSensorData = async () => {
-      try {
-        // Sử dụng API endpoint: GET /sensor/area/:area_id/latest
-        const data = await sensorApi.getLatestByArea(zoneId);
-        
-        if (data && data.length > 0) {
-          setSensorValues(prev => {
-            const newValues = { ...prev };
-            data.forEach(sensor => {
-              switch (sensor.type) {
-                case 'temp':
-                  newValues.temperature = sensor.value.toString();
-                  break;
-                case 'soil_moisture':
-                  newValues.soil_moisture = sensor.value.toString();
-                  break;
-                case 'moisture':
-                  newValues.moisture = sensor.value.toString();
-                  break;
-                case 'light':
-                  newValues.light = sensor.value.toString();
-                  break;
-                default:
-                  break;
-              }
-            });
-            return newValues;
-          });
-        }
-      } catch (error) {
-        console.error(`Lỗi khi lấy dữ liệu sensor cho khu vực ${zoneId}:`, error);
-      }
-    };
+      // 2. Lấy thông tin khu vực hiện tại
+      const currentArea = areas.find(a => a.id.toString() === zoneId);
+      if (!currentArea) throw new Error("Không tìm thấy khu vực");
 
-    // Khởi tạo gọi API lần đầu
-    const initData = async () => {
-      setLoading(true);
-      await Promise.all([fetchAreaInfo(), fetchSensorData()]);
+      // 3. Lọc Thiết bị & Lịch sử hoạt động thuộc về khu vực này
+      const allDevices = allDevicesRaw as DeviceData[];
+      const zoneDevices = allDevices.filter(d => d.area_name === currentArea.name);
+      const zoneLogs = allLogs.filter(l => l.area_name === currentArea.name).slice(0, 5);
+
+      // 4. Map dữ liệu Cảm biến
+      let temp = '--', soil = '--', humid = '--', light = '--';
+      latestSensors.forEach(s => {
+        if (s.type === 'temp') temp = s.value.toString();
+        if (s.type === 'soil_moisture') soil = s.value.toString();
+        if (s.type === 'moisture' || s.type === 'humidity') humid = s.value.toString();
+        if (s.type === 'light') light = s.value.toString();
+      });
+
+      // 5. Chuẩn bị dữ liệu cho biểu đồ (Lấy 10 mốc gần nhất)
+      const chartData: ChartData[] = tempHistory.map(h => ({
+        time: new Date(h.time).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' }),
+        temp: h.value
+      })).slice(-10);
+
+      setData({
+        areaInfo: currentArea,
+        sensors: { temp, soil, humid, light },
+        devices: zoneDevices,
+        logs: zoneLogs,
+        history: chartData
+      });
+
+    } catch (error) {
+      console.error(`Lỗi tải dữ liệu Zone ${zoneId}:`, error);
+    } finally {
       setLoading(false);
-    };
+    }
+  };
 
-    initData();
-
-    // Auto refresh data sensor mỗi 5 giây
-    const intervalId = setInterval(fetchSensorData, 5000);
+  useEffect(() => {
+    loadZoneData();
+    const intervalId = setInterval(loadZoneData, 10000);
     return () => clearInterval(intervalId);
-
   }, [zoneId]);
 
+  const { areaInfo, sensors, devices, logs, history } = data;
+
+  // Mảng cấu hình KPI Sensors để render gọn gàng
+  const sensorCards = [
+    { icon: ThermometerSun, label: "Nhiệt độ", value: sensors.temp, unit: "°C" },
+    { icon: Sprout, label: "Độ ẩm đất", value: sensors.soil, unit: "%" },
+    { icon: Droplets, label: "Độ ẩm KK", value: sensors.humid, unit: "%" },
+    { icon: Sun, label: "Ánh sáng", value: sensors.light, unit: "lux" }
+  ];
+
   return (
-    <div className="p-8 flex-1 flex flex-col gap-6 bg-white overflow-y-auto">
+    <div className="p-8 flex-1 flex flex-col gap-6 bg-gray-50 overflow-y-auto">
       {/* Header */}
       <div className="flex items-center gap-4">
-        <button
-          onClick={() => navigate('/dashboard')}
-          className="p-2 hover:bg-gray-100 rounded-full transition-colors"
-        >
+        <button onClick={() => navigate('/dashboard')} className="p-2 bg-white border border-gray-200 hover:bg-gray-100 rounded-full transition-colors">
           <ArrowLeft size={24} className="text-gray-600" />
         </button>
-        <div>
-          <h2 className="text-3xl font-bold text-brand-green uppercase flex items-center gap-3">
-            {areaInfo.name}
-            {loading && <RefreshCw className="w-5 h-5 text-gray-400 animate-spin" />}
-          </h2>
-          <p className="text-gray-500">
-            Giám sát và điều khiển cục bộ
-          </p>
+        <div className="flex-1 flex justify-between items-end">
+          <div>
+            <h2 className="text-3xl font-bold text-brand-green uppercase flex items-center gap-3">
+              {areaInfo.name}
+              {loading && <RefreshCw className="w-5 h-5 text-brand-green animate-spin" />}
+            </h2>
+          </div>
+          <button onClick={loadZoneData} className="flex items-center gap-2 bg-white px-4 py-2 rounded-lg shadow-sm text-brand-green hover:bg-gray-50 border border-gray-200">
+            <RefreshCw className="w-5 h-5" />
+            <span className="font-semibold">Cập nhật</span>
+          </button>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 gap-6">
-        {/* Banner truyền dữ liệu API thay vì Mock */}
-        <div className="">
-          <ZoneBannerCard
-            zoneName={areaInfo.name}
-            cropType={areaInfo.description} 
-          />
+      <div className="grid grid-cols-1">
+        {/* Banner */}
+        <div className="mb-6">
+          <ZoneBannerCard zoneName={areaInfo.name} cropType={areaInfo.description} />
         </div>
 
-        {/* Các thẻ chỉ số */}
-        <div className="grid grid-cols-2 gap-4">
-          <StatCard icon={ThermometerSun} label="Nhiệt độ" value={sensorValues.temperature} unit="°C" />
-          <StatCard icon={Sprout} label="Độ ẩm đất" value={sensorValues.soil_moisture} unit="%" />
-          <StatCard icon={Droplets} label="Độ ẩm" value={sensorValues.moisture} unit="%" />
-          <StatCard icon={Sun} label="Ánh sáng" value={sensorValues.light} unit="lux" />
+        {/* Các thẻ chỉ số Cảm biến */}
+        <div className="col-span-2 grid grid-cols-2 gap-4">
+          {sensorCards.map((s, idx) => (
+            <StatCard key={idx} icon={s.icon} label={s.label} value={s.value} unit={s.unit} />
+          ))}
         </div>
       </div>
 
-      {/* Phần dưới (Chờ cập nhật API) */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-4">
-        <div className="bg-gray-50 p-6 rounded-2xl border border-gray-100">
-          <h3 className="text-lg font-bold text-gray-800 mb-4">Thiết bị trong khu vực</h3>
-          <div className="h-32 flex flex-col items-center justify-center border-2 border-dashed border-gray-200 rounded-xl text-gray-400">
-            <p className="text-sm">Đang chờ Backend cập nhật API phân quyền thiết bị</p>
+      <div className=" bg-white p-5 rounded-2xl border border-gray-100 shadow-sm flex flex-col min-h-[400px]">
+        <h3 className="font-bold text-brand-green uppercase text-lg mb-4">Xu hướng Nhiệt độ (Gần đây)</h3>
+        <div className="flex-1 w-full">
+          {history.length > 0 ? (
+            <ResponsiveContainer width="100%" height="100%">
+              <LineChart data={history} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E5E7EB" />
+                <XAxis dataKey="time" tick={{ fontSize: 12 }} axisLine={false} tickLine={false} />
+                <YAxis domain={['auto', 'auto']} tick={{ fontSize: 12 }} axisLine={false} tickLine={false} />
+                <Tooltip cursor={{ stroke: '#F3F4F6', strokeWidth: 2 }} />
+                <Line type="monotone" dataKey="temp" name="Nhiệt độ (°C)" stroke="#9C050C" strokeWidth={3} dot={{ r: 4, fill: '#9C050C' }} activeDot={{ r: 6 }} />
+              </LineChart>
+            </ResponsiveContainer>
+          ) : (
+            <div className="h-full flex items-center justify-center text-gray-400 text-sm">
+              Chưa có đủ dữ liệu lịch sử để vẽ biểu đồ
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Phần Thiết bị & Biểu đồ */}
+      <div className="grid grid-cols-2 mt-2 gap-6">
+
+        <div className="flex flex-col gap-6">
+          <div className="bg-white p-5 rounded-2xl border border-gray-100 shadow-sm">
+            <h3 className="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
+              <Cpu className="text-brand-green" /> 
+              <h3 className="font-bold text-brand-green uppercase text-lg">Thiết bị</h3>
+            </h3>
+            <div className="flex flex-col gap-3">
+              {devices.length > 0 ? devices.map(d => (
+                <div key={d.id} className="flex justify-between items-center p-3 bg-gray-50 rounded-lg border border-gray-100">
+                  <div>
+                    <p className="font-semibold text-sm text-gray-700">{d.device_name}</p>
+                    <p className="text-xs text-gray-400 mt-1">Cập nhật: {new Date(d.last_updated).toLocaleTimeString('vi-VN')}</p>
+                  </div>
+                  <span className={`text-xs px-3 py-1 rounded-full font-bold ${d.mode === 'ON' ? 'bg-brand-green text-white' : 'bg-gray-300 text-black'}`}>
+                    {d.mode}
+                  </span>
+                </div>
+              )) : <p className="text-sm text-gray-500 text-center py-4">Khu vực chưa có thiết bị</p>}
+            </div>
+          </div>
+
+        </div>
+
+        <div className="bg-white p-5 rounded-2xl border border-gray-100 shadow-sm flex-1">
+          <h3 className="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
+            <Clock className="text-brand-green" /> 
+            <h3 className="font-bold text-brand-green uppercase text-lg">Lịch sử hoạt động</h3>
+          </h3>
+          <div className="flex flex-col gap-3">
+            {logs.length > 0 ? logs.map(l => (
+              <div key={l.id} className="border-b border-gray-50 pb-2 text-sm last:border-0">
+                <div className="flex justify-between items-start">
+                  <span className="font-semibold text-gray-700">{l.device_name}</span>
+                  <span className="text-[10px] text-brand-green px-2 py-0.5 bg-second-green rounded-full font-bold">{l.mode}</span>
+                </div>
+                <div className="flex justify-between text-xs text-gray-400 mt-1">
+                  <span>{l.source === 'auto' ? 'Tự động' : 'Thủ công'}</span>
+                  <span>{new Date(l.time).toLocaleTimeString('vi-VN')}</span>
+                </div>
+              </div>
+            )) : <p className="text-sm text-gray-500 text-center py-4">Chưa có lịch sử</p>}
           </div>
         </div>
 
-        <div className="bg-gray-50 p-6 rounded-2xl border border-gray-100">
-          <h3 className="text-lg font-bold text-gray-800 mb-4">Xu hướng 24h</h3>
-          <div className="h-32 flex items-center justify-center border-2 border-dashed border-gray-200 rounded-xl text-gray-400">
-            <p className="text-sm">Khu vực hiển thị biểu đồ</p>
-          </div>
-        </div>
       </div>
     </div>
   );

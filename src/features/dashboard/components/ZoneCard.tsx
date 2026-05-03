@@ -47,7 +47,7 @@ export const ZoneCard: React.FC<ZoneCardProps> = ({
                 <div className="flex justify-between items-center mb-4">
                     <h3 className="text-xl font-bold text-gray-800">{name}</h3>
                     <div className={`px-2 py-1 rounded-full text-xs font-medium border ${statusColors[status]}`}>
-                        {status === 'normal' ? 'Hoạt động tốt' : status === 'warning' ? 'Cảnh báo' : 'Lỗi thiết bị'}
+                        {status === 'normal' ? 'Tốt' : status === 'warning' ? 'Cảnh báo' : 'Lỗi'}
                     </div>
                 </div>
 

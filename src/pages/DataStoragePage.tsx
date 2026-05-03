@@ -2,7 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { Download, RefreshCw, MapPin, ChevronDown, Clock, Activity } from 'lucide-react';
 import { areaApi, type AreaData } from '../features/dashboard/api/areaApi';
 import { sensorApi, type SensorHistoryData } from '../features/dashboard/api/sensorApi';
-import { activityApi, type ActivityLog } from '../features/dashboard/api/activityApi';
+import { activityApi } from '../features/dashboard/api/activityApi';
+import { fetchDevices } from '../features/device/api/deviceApi'; // THÊM IMPORT NÀY
 import { EnvHistoryChart } from '../components/Charts/EnvHistoryChart';
 import { DeviceHistoryChart } from '../components/Charts/DeviceHistoryChart';
 import { DeviceDurationChart } from '../components/Charts/DeviceDurationChart';
@@ -21,16 +22,37 @@ interface ChartDevice {
   data: Array<{ name: string; autoOn: number; manualOn: number; off: number; durationHours: number }>;
 }
 
+interface EnvDataPoint {
+  [key: string]: string | number;
+  time: string;
+  value: number;
+}
+
+// Bổ sung Interface để bắt kiểu chặt chẽ cho thiết bị
+interface DeviceData {
+  id: number;
+  device_name: string;
+  type: string;
+  status: number;
+  area_name: string;
+  mode: 'ON' | 'OFF';
+  last_updated: string;
+}
+
 export const DataStoragePage: React.FC = () => {
   const [activeTab, setActiveTab] = useState<TabType>('environment');
-
   const [deviceViewMode, setDeviceViewMode] = useState<DeviceViewMode>('frequency'); 
   
   const [areas, setAreas] = useState<AreaData[]>([]);
   const [selectedAreaId, setSelectedAreaId] = useState<number | null>(null);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
-  const [envData, setEnvData] = useState({ temp: [], soil_moisture: [], moisture: [], light: [] });
+  const [envData, setEnvData] = useState<{
+    temp: EnvDataPoint[];
+    soil_moisture: EnvDataPoint[];
+    moisture: EnvDataPoint[];
+    light: EnvDataPoint[];
+  }>({ temp: [], soil_moisture: [], moisture: [], light: [] });
   const [isEnvLoading, setIsEnvLoading] = useState(false);
 
   const [devicesData, setDevicesData] = useState<ChartDevice[]>([]);
@@ -55,80 +77,102 @@ export const DataStoragePage: React.FC = () => {
   // FETCH MÔI TRƯỜNG
   useEffect(() => {
     if (activeTab !== 'environment' || !selectedAreaId) return;
+    
     const fetchAllEnvData = async () => {
       setIsEnvLoading(true);
       try {
         const types = ['temp', 'soil_moisture', 'moisture', 'light'];
-        const results = await Promise.all(types.map(type => sensorApi.getHistoryByAreaAndType(selectedAreaId.toString(), type)));
-        const formatData = (data: SensorHistoryData[]) => data.map(item => ({
-          time: new Date(item.time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }), value: item.value
-        })).reverse();
-        setEnvData({ temp: formatData(results[0]) as any, soil_moisture: formatData(results[1]) as any, moisture: formatData(results[2]) as any, light: formatData(results[3]) as any });
-      } catch (error) { console.error(error); } finally { setIsEnvLoading(false); }
+        
+        const results = await Promise.all(
+          types.map(type => 
+            sensorApi.getHistoryByAreaAndType(selectedAreaId.toString(), type)
+              .catch(() => [] as SensorHistoryData[]) 
+          )
+        );
+
+        const formatData = (data: SensorHistoryData[]): EnvDataPoint[] => 
+          data.map(item => ({
+            time: new Date(item.time).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' }), 
+            value: item.value
+          })).reverse();
+
+        setEnvData({ 
+          temp: formatData(results[0]), 
+          soil_moisture: formatData(results[1]), 
+          moisture: formatData(results[2]), 
+          light: formatData(results[3]) 
+        });
+      } catch (error) { 
+        console.error("Lỗi khi tải dữ liệu môi trường:", error); 
+      } finally { 
+        setIsEnvLoading(false); 
+      }
     };
     fetchAllEnvData();
   }, [selectedAreaId, activeTab]);
 
-  // FETCH & BIẾN ĐỔI DỮ LIỆU THIẾT BỊ
+  // FETCH & BIẾN ĐỔI DỮ LIỆU THIẾT BỊ DỰA THEO ID THIẾT BỊ
   useEffect(() => {
     if (activeTab !== 'device' || !currentArea) return;
 
     const fetchDeviceActivity = async () => {
       setIsDeviceLoading(true);
       try {
-        const logs = await activityApi.getAll(); 
-        const areaLogs = logs.filter(log => log.area_name === currentArea.name);
+        const allDevices = await fetchDevices() as DeviceData[];
+        const areaDevices = allDevices.filter(d => d.area_name === currentArea.name);
 
-        const devicesMap = new Map<number, { name: string, type: string, logs: ActivityLog[] }>();
-        areaLogs.forEach(log => {
-          if (!devicesMap.has(log.device_id)) devicesMap.set(log.device_id, { name: log.device_name, type: log.device_type, logs: [] });
-          devicesMap.get(log.device_id)!.logs.push(log);
-        });
-
-        const parsedDevicesData: ChartDevice[] = Array.from(devicesMap.entries()).map(([id, device]) => {
-          
-          const monthlyData: Record<string, { name: string, autoOn: number, manualOn: number, off: number, durationHours: number }> = {};
-          
-          const sortedLogs = device.logs.sort((a, b) => new Date(a.time).getTime() - new Date(b.time).getTime());
-          
-          let lastOnTime: Date | null = null;
-
-          sortedLogs.forEach(log => {
-            const date = new Date(log.time);
-            const month = date.toLocaleString('en-US', { month: 'short' });
+        const parsedDevicesData: ChartDevice[] = await Promise.all(
+          areaDevices.map(async (device) => {
+            const deviceLogs = await activityApi.getByDevice(device.id).catch(() => []);
             
-            if (!monthlyData[month]) {
-              monthlyData[month] = { name: month, autoOn: 0, manualOn: 0, off: 0, durationHours: 0 };
-            }
+            const monthlyData: Record<string, { name: string, autoOn: number, manualOn: number, off: number, durationHours: number }> = {};
+            
+            const sortedLogs = deviceLogs.sort((a, b) => new Date(a.time).getTime() - new Date(b.time).getTime());
+            
+            let lastOnTime: Date | null = null;
 
-            // Tính toán Tần suất 
-            if (log.mode === 'ON' && log.source === 'auto') monthlyData[month].autoOn += 1;
-            else if (log.mode === 'ON' && log.source === 'manual') monthlyData[month].manualOn += 1;
-            else monthlyData[month].off += 1; 
-
-            // Tính toán Thời gian
-            if (log.mode === 'ON') {
-              if (!lastOnTime) lastOnTime = date;
-            } else if (log.mode === 'OFF') {
-              if (lastOnTime) {
-                const durationMs = date.getTime() - lastOnTime.getTime();
-                const durationHours = durationMs / (1000 * 60 * 60); 
-                monthlyData[month].durationHours += durationHours;
-                lastOnTime = null;
+            sortedLogs.forEach(log => {
+              const date = new Date(log.time);
+              const month = date.toLocaleString('en-US', { month: 'short' });
+              
+              if (!monthlyData[month]) {
+                monthlyData[month] = { name: month, autoOn: 0, manualOn: 0, off: 0, durationHours: 0 };
               }
-            }
-          });
 
-          Object.values(monthlyData).forEach(m => { m.durationHours = Number(m.durationHours.toFixed(2)); });
+              // Tính Tần suất
+              if (log.mode === 'ON' && log.source === 'auto') monthlyData[month].autoOn += 1;
+              else if (log.mode === 'ON' && log.source === 'manual') monthlyData[month].manualOn += 1;
+              else if (log.mode === 'OFF') monthlyData[month].off += 1; 
 
-          const monthsOrder = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-          const sortedChartData = Object.values(monthlyData).sort((a, b) => monthsOrder.indexOf(a.name) - monthsOrder.indexOf(b.name));
+              // Tính Thời lượng hoạt động
+              if (log.mode === 'ON') {
+                if (!lastOnTime) lastOnTime = date;
+              } else if (log.mode === 'OFF') {
+                if (lastOnTime) {
+                  const durationMs = date.getTime() - lastOnTime.getTime();
+                  const durationHours = durationMs / (1000 * 60 * 60); 
+                  monthlyData[month].durationHours += durationHours;
+                  lastOnTime = null; // Reset bộ đếm
+                }
+              }
+            });
 
-          return { id, name: device.name, type: device.type, data: sortedChartData };
-        });
+            // Làm tròn tổng số giờ
+            Object.values(monthlyData).forEach(m => { m.durationHours = Number(m.durationHours.toFixed(2)); });
+
+            const monthsOrder = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+            const sortedChartData = Object.values(monthlyData).sort((a, b) => monthsOrder.indexOf(a.name) - monthsOrder.indexOf(b.name));
+
+            return { id: device.id, name: device.device_name, type: device.type, data: sortedChartData };
+          })
+        );
 
         setDevicesData(parsedDevicesData);
-      } catch (error) { console.error(error); } finally { setIsDeviceLoading(false); }
+      } catch (error) { 
+        console.error("Lỗi khi tải dữ liệu thiết bị:", error); 
+      } finally { 
+        setIsDeviceLoading(false); 
+      }
     };
 
     fetchDeviceActivity();
@@ -180,11 +224,8 @@ export const DataStoragePage: React.FC = () => {
         </div>
       )}
 
-      {/* CONTENT TAB THIẾT BỊ CÓ TOGGLE */}
       {activeTab === 'device' && (
         <div className="animate-in fade-in duration-500">
-          
-          {/* Thanh Toggle Góc Nhìn */}
           <div className="flex justify-center mb-6">
             <div className="bg-gray-100 p-1 rounded-xl flex items-center shadow-inner">
               <button 
@@ -215,7 +256,6 @@ export const DataStoragePage: React.FC = () => {
                       {device.name}
                     </h3>
                     <div className="flex-1 w-full mt-2">
-                      {/* RENDER DỰA THEO TOGGLE */}
                       {deviceViewMode === 'frequency' ? (
                         <DeviceHistoryChart data={device.data} colors={getDeviceColors(device.type)} />
                       ) : (
@@ -233,15 +273,20 @@ export const DataStoragePage: React.FC = () => {
   );
 };
 
-// Component ChartBox giữ nguyên
-const ChartBox = ({ title, data, color, isLoading, onDownload }: { title: string, data: Record<string, string | number>[], color: string, isLoading: boolean, onDownload: () => void }) => (
+const ChartBox = ({ title, data, color, isLoading, onDownload }: { title: string, data: EnvDataPoint[], color: string, isLoading: boolean, onDownload: () => void }) => (
   <div className="bg-[#e8efe9] rounded-3xl p-6 relative flex flex-col h-72 border border-brand-green/10">
     <div className="flex justify-between items-center mb-4">
       <h3 className="text-2xl font-bold text-[#b91c1c]">{title}</h3>
       <button onClick={onDownload} className="bg-[#1a5b32] p-2 rounded-full text-white hover:bg-green-800 transition"><Download size={18} strokeWidth={2.5} /></button>
     </div>
     <div className="flex-1 w-full relative">
-      {isLoading ? <div className="absolute inset-0 flex justify-center items-center"><RefreshCw className="animate-spin text-brand-green" /></div> : data.length === 0 ? <div className="absolute inset-0 flex justify-center items-center text-gray-400 font-medium">Chưa có dữ liệu</div> : <EnvHistoryChart data={data} dataKeyX="time" dataKeyY="value" color={color} />}
+      {isLoading ? (
+        <div className="absolute inset-0 flex justify-center items-center"><RefreshCw className="animate-spin text-brand-green" /></div>
+      ) : data.length === 0 ? (
+        <div className="absolute inset-0 flex justify-center items-center text-gray-400 font-medium">Chưa có dữ liệu</div>
+      ) : (
+        <EnvHistoryChart data={data} dataKeyX="time" dataKeyY="value" color={color} />
+      )}
     </div>
   </div>
 );
