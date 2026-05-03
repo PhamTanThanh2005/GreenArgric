@@ -484,9 +484,12 @@ Trả về (Success 200):
     "message": "Nhiệt độ hiện tại (33°C) vượt ngưỡng cho phép",
     "type": "WARNING",
     "created_at": "2026-04-28T15:20:00Z"
+    "is_read": true
   }
 ]
 ```
+
+Endpoint: ```GET /notification```
 
 ### Quản lý người dùng
 
