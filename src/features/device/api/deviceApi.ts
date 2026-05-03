@@ -24,3 +24,18 @@ export const overrideDevice = async (deviceId: number, mode: 'ON' | 'OFF', expir
     throw error;
   }
 };
+
+export const createDevice = async (data: { name: string; type: string; area_id: number; status?: number }) => {
+  const response = await axiosClient.post('/device', data);
+  return response.data;
+};
+
+export const updateDevice = async (id: number, data: { name?: string; type?: string; area_id?: number; status?: number }) => {
+  const response = await axiosClient.put(`/device/${id}`, data);
+  return response.data;
+};
+
+export const deleteDevice = async (id: number) => {
+  const response = await axiosClient.delete(`/device/${id}`);
+  return response.data;
+};

@@ -1,7 +1,7 @@
 // src/utils/api.ts
 
 export const fetchWithAuth = async (endpoint: string, options: RequestInit = {}) => {
-  const token = localStorage.getItem('token'); // Đã có sẵn chữ "Bearer " ở bước đăng nhập
+  const token = localStorage.getItem('token');
   
   const headers = {
     'Content-Type': 'application/json',
@@ -14,16 +14,11 @@ export const fetchWithAuth = async (endpoint: string, options: RequestInit = {})
     headers,
   });
 
-  // Nếu token hết hạn hoặc sai (401)
   if (response.status === 401) {
     localStorage.removeItem('token');
     localStorage.removeItem('role');
-    window.location.href = '/'; // Đuổi về trang chủ
+    window.location.href = '/';
   }
 
   return response;
 };
-
-// CÁCH DÙNG TẠI DASHBOARD: 
-// const res = await fetchWithAuth('/api/sensors/data'); 
-// const data = await res.json();

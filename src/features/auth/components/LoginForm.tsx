@@ -36,7 +36,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({ role }) => {
       if (userRole === 'owner') {
         navigate('/dashboard'); 
       } else if (userRole === 'admin') {
-        navigate('/admin-dashboard'); 
+        navigate('/admin/dashboard');
       } else {
         navigate('/dashboard'); 
       }
