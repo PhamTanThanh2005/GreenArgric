@@ -8,7 +8,7 @@ const navItems =[
   { name: 'TRANG CHỦ', icon: Home, path: '/dashboard' },
   { name: 'THÔNG SỐ MÔI TRƯỜNG', icon: Thermometer, path: '/environment' },
   { name: 'ĐIỀU KHIỂN THIẾT BỊ', icon: Radio, path: '/control-device' },
-  { name: 'DỮ LIỆU LƯU TRỮ', icon: Database, path: '/data' },
+  { name: 'DỮ LIỆU LƯU TRỮ', icon: Database, path: '/storage' },
 ];
 
 export const Sidebar: React.FC = () => {

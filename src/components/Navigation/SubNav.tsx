@@ -41,6 +41,7 @@ export const SubNav: React.FC = () => {
     if (path.includes('/control-device')) return 'Điều khiển thiết bị';
     if (path.includes('/environment')) return 'Thông số môi trường';
     if (path.includes('/profile')) return 'Hồ sơ cá nhân';
+    if (path.includes('/storage')) return 'Dữ liệu lưu trữ';
     
     const matchedZone = areas.find(z => path.includes(`/zones/${z.id}`));
     if (matchedZone) return matchedZone.name;

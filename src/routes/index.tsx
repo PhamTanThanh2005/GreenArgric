@@ -9,6 +9,7 @@ import { FunctionLayout } from '../layouts/FunctionLayout';
 import { ControlDevicePage } from '../pages/ControlDevicePage';
 import { ProfilePage } from '../pages/ProfilePage';
 import { EnvironmentParametersPage } from '../pages/EnvironmentParametersPage';
+import { DataStoragePage } from '../pages/DataStoragePage';
 
 export const AppRoutes: React.FC = () => {
   return (
@@ -29,6 +30,7 @@ export const AppRoutes: React.FC = () => {
           <Route path="/control-device" element={<ControlDevicePage/>} />
           <Route path="/profile" element={<ProfilePage />} />
           <Route path="/environment" element={<EnvironmentParametersPage />} />
+          <Route path="/storage" element={<DataStoragePage />} />
         </Route>
 
         
