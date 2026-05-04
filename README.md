@@ -17,7 +17,7 @@
 ## Cài đặt & Khởi chạy
 ### Cài đặt các thư viện
 ```bash
-npm install
+npm install express mssql jsonwebtoken bcrypt mqtt dotenv swagger-ui-express
 ```
 
 ### Khởi tạo Database
