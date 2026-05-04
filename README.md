@@ -1,6 +1,20 @@
 # 🌿GREEN ARGRIC
 Green Argric là hệ thống quản trị và giám sát nông nghiệp thông minh toàn diện. Dự án cho phép chủ vườn giám sát các thông số môi trường (Nhiệt độ, Độ ẩm, Ánh sáng) theo thời gian thực và điều khiển thiết bị (Máy bơm, Đèn) thông qua giao thức MQTT, kết hợp với bộ máy tự động hóa thông minh.
 
+<!-- PROJECT LOGO -->
+<br />
+<div align="center">
+  <h3 align="center">GREEN ARGRIC</h3>
+
+  <p align="center">
+    <br />
+    <a href="backend/README.md"><strong>Explore Backend Docs »</strong></a>
+    ·
+    <a href="frontend/README.md"><strong>Explore Frontend Docs »</strong></a>
+    <br />
+  </p>
+</div>
+
 ## 🚀 Công nghệ sử dụng (Tech Stack)
 ### Frontend
 * Core: React 18, TypeScript, Vite.
