@@ -669,9 +669,24 @@ File mqtt.js chạy ngầm như một Background Worker thực hiện các công
 
 ## Luồng hoạt động
 ```
-[Phần cứng IoT] ---> (MQTT Broker) ---> [Node.js Backend] ---> (SQL Server)
-       ^                                      |                      |
-       |                                      v                      v
-       +------------- (MQTT Broker) <---- [Kiểm tra Ngưỡng] <---- (Dashboard Frontend)
+[Phần cứng IoT & Cảm biến] 
+       |       ^
+       |       |
+ (Gửi Data)  (Nhận Lệnh)
+       |       |
+       v       |
+   [MQTT Broker OhStem]
+       |       ^
+       |       |
+(Lắng nghe) (Publish Lệnh)
+       |       |
+       v       |
+[Node.js Backend & Auto Engine] <--- (Xác thực JWT) <--- [Giao diện Dashboard]
+       |
+       |
+(Lưu/Đọc/So sánh dữ liệu)
+       |
+       v
+  [SQL Server DB] 
 ```
 

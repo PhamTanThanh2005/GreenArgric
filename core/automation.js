@@ -36,25 +36,23 @@ export async function runAutomationForArea(area_id) {
             .input("area_id", sql.Int, area_id)
             .query(`SELECT id, type FROM Device WHERE area_id = @area_id AND status = 1`);
 
-        // ======== KIỂM TRA TỪNG THIẾT BỊ ========
         for (const device of devicesRes.recordset) {
             // Check manual override (Ưu tiên quyền thủ công)
             const override = await pool.request()
                 .input("device_id", sql.Int, device.id)
-                .query(`SELECT TOP 1 id FROM ManualOverride WHERE device_id = @device_id AND expire_time > GETDATE()`);
+                .query(`SELECT TOP 1 device_id FROM ManualOverride WHERE device_id = @device_id AND expire_time > GETDATE()`);
             
             if (override.recordset.length > 0) {
                 console.log(`[AUTO] Thiết bị ${device.type} (ID: ${device.id}) đang bị ghi đè thủ công -> Bỏ qua tự động.`);
                 continue;
             }
 
-            // Lấy trạng thái cuối cùng
             const lastModeRes = await pool.request()
                 .input("device_id", sql.Int, device.id)
                 .query(`SELECT TOP 1 mode FROM ActivityLog WHERE device_id = @device_id ORDER BY time DESC`);
             const lastMode = lastModeRes.recordset.length > 0 ? lastModeRes.recordset[0].mode : 'OFF';
 
-            // --- Logic Điều khiển MÁY BƠM ---
+            // --- MÁY BƠM ---
             if (device.type === 'pump' && thresholds['soil_moisture']) {
                 const sm = data['soil_moisture'];
                 const temp = data['temp'] || 0;
@@ -71,7 +69,7 @@ export async function runAutomationForArea(area_id) {
                 }
             }
 
-            // --- Logic Điều khiển ĐÈN ---
+            // --- ĐÈN ---
             if (device.type === 'light' && thresholds['light']) {
                 const lightVal = data['light'];
                 const th = thresholds['light'];
@@ -93,6 +91,6 @@ async function triggerDevice(device, mode, mqttTopic, reason, area_id) {
     client.publish(mqttTopic, payload, { retain: true });
     
     await logActivity(device.id, mode, "auto");
-    await notifyAreaOwners(area_id, `Hệ thống tự động: ${mode} ${device.type.toUpperCase()}`, reason, "SYSTEM");
+    await notifyAreaOwners(area_id, `Hệ thống tự động: ${mode} ${device.type.toUpperCase()}`, `${device.type.toUpperCase()} ${mode} vì ${reason}`, "INFO");
     console.log(`[AUTO] Đã ${mode} ${device.type.toUpperCase()} (ID: ${device.id}) - Lý do: ${reason}`);
 }

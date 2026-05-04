@@ -2,7 +2,9 @@ import express from "express";
 import { verifyToken, requireAdmin } from "../middleware/auth.js";
 import pool, { sql } from "../db.js";
 import { client } from "../mqtt.js";
-import { CONTROL_PUMP, CONTROL_LIGHT } from "../core/const.js";
+import { logActivity } from "../core/utils.js";
+const FEED_BASE = process.env.MQTT_FEED || "MinhTriDADN/feeds";
+
 
 const router = express.Router();
 
@@ -41,58 +43,49 @@ router.get("/", verifyToken, async (req, res) => {
     }
 });
 
-// =======================
-// POST Điều khiển thủ công (Manual Override)
-// =======================
+// =======================================
+// POST /device/override - Điều khiển thiết bị thủ công
+// =======================================
 router.post("/override", verifyToken, async (req, res) => {
     const { device_id, mode, expire_time } = req.body;
-    const userId = req.user.id;
+    const user_id = req.user.id;
 
     try {
-        // Composite Key: user_id, device_id
+        const deviceRes = await pool.request()
+            .input("device_id", sql.Int, device_id)
+            .query("SELECT id, type, feed_key FROM Device WHERE id = @device_id");
+
+        if (deviceRes.recordset.length === 0) return res.status(404).json({ error: "Không tìm thấy thiết bị" });
+        const device = deviceRes.recordset[0];
+
+        if (!device.feed_key) return res.status(400).json({ error: "Thiết bị chưa được cấu hình Feed Key (Vxx)" });
+
         await pool.request()
-            .input("user_id", sql.Int, userId)
+            .input("user_id", sql.Int, user_id)
             .input("device_id", sql.Int, device_id)
             .input("mode", sql.NVarChar, mode)
-            .input("expire_time", sql.DateTime, expire_time)
+            .input("expire_time", sql.DateTime, new Date(expire_time))
             .query(`
                 IF EXISTS (SELECT 1 FROM ManualOverride WHERE user_id = @user_id AND device_id = @device_id)
-                    UPDATE ManualOverride 
-                    SET mode = @mode, expire_time = @expire_time, created_at = GETDATE()
-                    WHERE user_id = @user_id AND device_id = @device_id
+                    UPDATE ManualOverride SET mode = @mode, expire_time = @expire_time, created_at = GETDATE() WHERE user_id = @user_id AND device_id = @device_id
                 ELSE
-                    INSERT INTO ManualOverride (user_id, device_id, mode, expire_time)
-                    VALUES (@user_id, @device_id, @mode, @expire_time)
+                    INSERT INTO ManualOverride (user_id, device_id, mode, expire_time) VALUES (@user_id, @device_id, @mode, @expire_time)
             `);
 
-        await pool.request()
-            .input("device_id", sql.Int, device_id)
-            .input("mode", sql.NVarChar, mode)
-            .input("source", sql.NVarChar, "manual")
-            .query(`
-                INSERT INTO ActivityLog (device_id, mode, source)
-                VALUES (@device_id, @mode, @source)
-            `);
+        const mqttTopic = `${FEED_BASE}/${device.feed_key}`; // VD: MinhTriDADN/feeds/V10
+        const payload = mode === 'ON' ? "1" : "0";
         
-        const devRes = await pool.request()
-            .input("device_id", sql.Int, device_id)
-            .query("SELECT type FROM Device WHERE id = @device_id");
-            
-        if (devRes.recordset.length > 0) {
-            const devType = devRes.recordset[0].type;
-            const payload = mode === "ON" ? "1" : "0";
+        client.publish(mqttTopic, payload, { retain: true });
+        console.log(`[MANUAL] Bắn ${payload} ra Topic: ${mqttTopic}`);
 
-            if (devType === 'pump') {
-                client.publish(CONTROL_PUMP, payload, { retain: true });
-            } else if (devType === 'light') {
-                client.publish(CONTROL_LIGHT, payload, { retain: true });
-            }
-        }
-
-        res.json({ message: "Gửi lệnh điều khiển thành công" });
+        await logActivity(device_id, mode, "manual");
+        res.json({ message: "Gửi lệnh thành công" });
     } catch (error) {
-        console.error("Error creating manual override:", error);
-        res.status(500).json({ error: "Lỗi server nội bộ" });
+        console.error("Lỗi Override:", error);
+        console.error("==== LỖI CHI TIẾT OVERRIDE DEVICE ====");
+        console.error(error); 
+        console.error("=====================================");
+        res.status(500).json({ error: "Lỗi server" });
     }
 });
 

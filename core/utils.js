@@ -1,7 +1,6 @@
 import sql from "mssql";
 import pool from "../db.js";
 
-// Ghi log hoạt động của thiết bị
 export async function logActivity(device_id, mode, source) {
     await pool.request()
         .input("device_id", sql.Int, device_id)
@@ -13,7 +12,6 @@ export async function logActivity(device_id, mode, source) {
         `);
 }
 
-// Gửi thông báo cho tất cả người dùng quản lý một khu vực
 export async function notifyAreaOwners(area_id, title, message, type = "INFO") {
     const owners = await pool.request()
         .input("area_id", sql.Int, area_id)
