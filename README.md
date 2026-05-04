@@ -660,12 +660,16 @@ Trả về (Success: 200):
 
 
 ## Luồng xử lý tự động hóa (Auto Control Engine)
-File mqtt.js chạy ngầm như một Background Worker thực hiện các công việc:
-1. Lắng nghe dữ liệu đổ về từ các topic ```V1, V2, V3, V4.```
-2. Lưu vết (Insert) vào cơ sở dữ liệu ```SensorData```.
-3. So sánh giá trị với bảng ```ThresholdConfig``` của khu vực tương ứng.  
-4. Cảnh báo: Nếu vượt ngưỡng, tạo dòng dữ liệu vào Notification.  
-5. Điều khiển tự động: Nếu độ ẩm đất thấp, tự động Publish giá trị 1 xuống Topic của ```Máy bơm (V14)``` để bật nước, đồng thời ghi nhận vào bảng ```ActivityLog```
+
+Hệ thống sử dụng Background Worker (`mqtt.js` & `automation.js`) chạy ngầm để xử lý dữ liệu thời gian thực theo 4 bước chặt chẽ:
+
+* **Lắng nghe dữ liệu (Wildcard Subscribe):** Tự động nhận dữ liệu từ tất cả cảm biến dựa trên `feed_key` (VD: V1, V2...) được cấu hình trong Database, dễ dàng mở rộng N khu vực.
+* **Lọc dữ liệu thông minh (Delta Filtering):** Chỉ lưu vết (Insert) vào bảng `SensorData` khi giá trị thay đổi vượt ngưỡng cấu hình (VD: lệch 0.5°C). Giúp tối ưu hóa Database và chống "rác" dữ liệu.
+* **Cảnh báo tức thời (Alerting):** Đối chiếu dữ liệu mới với bảng `ThresholdConfig`. Nếu vượt ngưỡng an toàn (Min/Max), tự động ghi nhận vào bảng `Notification` để báo cho người quản lý.
+* **Điều khiển tự động đa lớp (Smart Control):**
+    *   *Ưu tiên thủ công:* Bỏ qua lệnh tự động nếu thiết bị đang trong thời gian bị người dùng khóa (`ManualOverride`).
+    *   *Chống Spam MQTT:* So sánh với trạng thái cuối trong `ActivityLog`, chỉ phát lệnh khi thực sự cần đổi trạng thái để bảo vệ rơ-le phần cứng.
+    *   *Thực thi:* Publish lệnh xuống MQTT (VD: xuất mức `1` ra topic `V10` để bật máy bơm khi đất khô) và lưu lịch sử vào `ActivityLog`.
 
 ## Luồng hoạt động
 ```
