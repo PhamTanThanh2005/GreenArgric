@@ -74,11 +74,18 @@ export const ZoneDashboardPage: React.FC = () => {
         if (s.type === 'light') light = s.value.toString();
       });
 
-      const chartData: ChartData[] = tempHistory.map(h => ({
-        time: new Date(h.time).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' }),
-        temp: h.value
-      })).slice(0, 15);
-
+      const chartData: ChartData[] = tempHistory
+        .slice(0, 15)
+        .reverse()
+        .map(h => ({
+          time: new Date(h.time).toLocaleTimeString('vi-VN', {
+            hour: '2-digit',
+            minute: '2-digit',
+            hour12: false, 
+            timeZone: 'UTC'
+          }),
+          temp: h.value
+        }));
       setData({
         areaInfo: currentArea,
         sensors: { temp, soil, humid, light },
@@ -141,7 +148,7 @@ export const ZoneDashboardPage: React.FC = () => {
         </div>
       </div>
 
-      <div className=" bg-white p-5 rounded-2xl border border-gray-100 shadow-sm flex flex-col min-h-[400px]">
+      <div className=" bg-white p-5 rounded-2xl border border-gray-100 shadow-sm flex flex-col min-h-100">
         <h3 className="font-bold text-brand-green uppercase text-lg mb-4">Xu hướng Nhiệt độ (Gần đây)</h3>
         <div className="flex-1 w-full">
           {history.length > 0 ? (
@@ -167,7 +174,7 @@ export const ZoneDashboardPage: React.FC = () => {
         <div className="flex flex-col gap-6">
           <div className="bg-white p-5 rounded-2xl border border-gray-100 shadow-sm">
             <h3 className="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
-              <Cpu className="text-brand-green" /> 
+              <Cpu className="text-brand-green" />
               <h3 className="font-bold text-brand-green uppercase text-lg">Thiết bị</h3>
             </h3>
             <div className="flex flex-col gap-3">
@@ -189,7 +196,7 @@ export const ZoneDashboardPage: React.FC = () => {
 
         <div className="bg-white p-5 rounded-2xl border border-gray-100 shadow-sm flex-1">
           <h3 className="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
-            <Clock className="text-brand-green" /> 
+            <Clock className="text-brand-green" />
             <h3 className="font-bold text-brand-green uppercase text-lg">Lịch sử hoạt động</h3>
           </h3>
           <div className="flex flex-col gap-3">

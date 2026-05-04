@@ -7,7 +7,6 @@ export const PublicLayout: React.FC = () => {
     <div className="min-h-screen flex flex-col font-sans">
       <Header />
 
-      {/* Nội dung trang */}
       <main className="flex-1 flex flex-col">
         <Outlet />
       </main>

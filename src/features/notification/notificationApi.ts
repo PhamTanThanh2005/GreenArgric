@@ -15,7 +15,6 @@ export const notificationApi = {
     return response.data;
   },
   
-  // Đánh dấu đã đọc
   markAsRead: async (id: number): Promise<void> => {
     await axiosClient.post(`/notification/${id}/read`);
   }

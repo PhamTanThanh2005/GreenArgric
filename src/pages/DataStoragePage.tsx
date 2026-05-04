@@ -3,7 +3,7 @@ import { Download, RefreshCw, MapPin, ChevronDown, Clock, Activity } from 'lucid
 import { areaApi, type AreaData } from '../features/dashboard/api/areaApi';
 import { sensorApi, type SensorHistoryData } from '../features/dashboard/api/sensorApi';
 import { activityApi } from '../features/dashboard/api/activityApi';
-import { fetchDevices } from '../features/device/api/deviceApi'; // THÊM IMPORT NÀY
+import { fetchDevices } from '../features/device/api/deviceApi';
 import { EnvHistoryChart } from '../components/Charts/EnvHistoryChart';
 import { DeviceHistoryChart } from '../components/Charts/DeviceHistoryChart';
 import { DeviceDurationChart } from '../components/Charts/DeviceDurationChart';
@@ -85,10 +85,18 @@ export const DataStoragePage: React.FC = () => {
         );
 
         const formatData = (data: SensorHistoryData[]): EnvDataPoint[] =>
-          data.map(item => ({
-            time: new Date(item.time).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' }),
-            value: item.value
-          })).reverse();
+          data
+            .reverse()
+            .map(item => {
+              const dateObj = new Date(item.time);
+              const hours = dateObj.getUTCHours().toString().padStart(2, '0');
+              const minutes = dateObj.getUTCMinutes().toString().padStart(2, '0');
+
+              return {
+                time: `${hours}:${minutes}`,
+                value: item.value
+              };
+            });
 
         setEnvData({
           temp: formatData(results[0]),
@@ -141,7 +149,7 @@ export const DataStoragePage: React.FC = () => {
                   const durationMs = date.getTime() - lastOnTime.getTime();
                   const durationHours = durationMs / (1000 * 60 * 60);
                   monthlyData[month].durationHours += durationHours;
-                  lastOnTime = null; // Reset bộ đếm
+                  lastOnTime = null;
                 }
               }
             });

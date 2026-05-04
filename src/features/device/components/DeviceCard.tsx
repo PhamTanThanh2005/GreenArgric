@@ -30,9 +30,6 @@ export const DeviceCard: React.FC<DeviceCardProps> = ({
     >
       <img src={image} alt={title} className="absolute inset-0 w-full h-full object-cover" />
 
-      {/* <div className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-black/80 via-black/30 to-transparent pointer-events-none" /> */}
-
-      {/* --- ON/OFF --- */}
       <div className="absolute top-0 right-0">
         <div className="bg-white px-4 py-3 rounded-bl-[28px] relative flex items-center justify-center">
 
@@ -58,7 +55,6 @@ export const DeviceCard: React.FC<DeviceCardProps> = ({
         </div>
       </div>
 
-      {/* --- CỤM NỘI DUNG  --- */}
       <div className="absolute bottom-5 left-6 right-5 flex justify-between items-end">
         <h3 className="text-white text-[32px] font-extrabold leading-none tracking-tight shadow-2xl">
           {title}

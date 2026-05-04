@@ -18,7 +18,6 @@ export const LandingPage: React.FC = () => {
         />
       </div>
 
-      {/* Box Đăng nhập */}
       <div className="relative pt-10 px-6 flex-1 flex flex-col justify-center z-50">
         <div className="max-w-200 w-full mx-auto">
           <Card>

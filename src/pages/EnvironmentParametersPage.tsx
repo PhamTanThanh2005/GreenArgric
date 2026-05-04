@@ -27,7 +27,6 @@ export const EnvironmentParametersPage: React.FC = () => {
   const [areas, setAreas] = useState<AreaData[]>([]);
   const [selectedAreaId, setSelectedAreaId] = useState<number | null>(null);
 
-  // States cho Biểu đồ
   const [chartType, setChartType] = useState(CHART_TABS[0].id);
   const [chartData, setChartData] = useState<{ time: string; value: number }[]>([]);
   const [isChartLoading, setIsChartLoading] = useState(false);
@@ -43,7 +42,6 @@ export const EnvironmentParametersPage: React.FC = () => {
     light: '--'
   });
 
-  // Danh sách khu vực
   useEffect(() => {
     const fetchAreas = async () => {
       const data = await areaApi.getAll();
@@ -53,7 +51,6 @@ export const EnvironmentParametersPage: React.FC = () => {
     fetchAreas();
   }, []);
 
-  // Giá trị Cảm biến Mới nhất
   useEffect(() => {
     if (!selectedAreaId) return;
 
@@ -85,7 +82,6 @@ export const EnvironmentParametersPage: React.FC = () => {
     return () => clearInterval(intervalId);
   }, [selectedAreaId]);
 
-  // Dữ liệu Lịch sử cho Biểu đồ
   useEffect(() => {
     if (!selectedAreaId) return;
 
@@ -97,11 +93,13 @@ export const EnvironmentParametersPage: React.FC = () => {
           chartType
         );
 
-        const formattedData = rawData.map((item) => {
+        const formattedData = rawData
+          .map((item) => {
           const dateObj = new Date(item.time);
-          const timeStr = `${dateObj.getHours().toString().padStart(2, '0')}:${dateObj.getMinutes().toString().padStart(2, '0')}`;
+          const hours = dateObj.getUTCHours().toString().padStart(2, '0');
+          const minutes = dateObj.getUTCMinutes().toString().padStart(2, '0');
           return {
-            time: timeStr,
+            time: `${hours}:${minutes}`,
             value: item.value
           };
         });
@@ -132,7 +130,6 @@ export const EnvironmentParametersPage: React.FC = () => {
         </div>
 
         <div className="relative" ref={dropdownRef}>
-          {/* Nút mở Dropdown giữ nguyên... */}
           <button
             onClick={() => setIsDropdownOpen(!isDropdownOpen)}
             className="flex items-center gap-3 px-5 py-2.5 bg-white border-2 border-brand-green/20 rounded-xl text-brand-green font-bold shadow-sm hover:bg-brand-green/5 transition-all"
@@ -145,7 +142,6 @@ export const EnvironmentParametersPage: React.FC = () => {
           </button>
 
           {isDropdownOpen && (
-            // Dropdown Menu giữ nguyên...
             <div className="absolute top-full right-0 mt-2 w-full min-w-55 bg-white rounded-xl shadow-2xl border border-gray-100 py-2 z-50 max-h-64 overflow-y-auto">
               {areas.map((area) => (
                 <button
@@ -164,17 +160,12 @@ export const EnvironmentParametersPage: React.FC = () => {
         </div>
       </div>
 
-      {/* BANNER */}
       <div className="mb-8">
         <ZoneBannerCard zoneName={currentArea?.name || 'Đang tải...'} cropType={currentArea?.description || '...'} />
       </div>
 
-      {/* BỐ CỤC 3 CỘT*/}
       <div className="grid grid-cols-3 gap-6">
-
-        {/* KHỐI BIỂU ĐỒ */}
         <div className="col-span-2 flex flex-col">
-          {/* LƯỚI 4 CẢM BIẾN */}
           <div className="grid grid-cols-2 gap-6 mb-8">
             <SensorCard title="Nhiệt độ" value={sensorValues.temp} unit="°C" icon={Thermometer} imageSrc={imgTemp} valueColor="text-brand-red" />
             <SensorCard title="Độ ẩm đất" value={sensorValues.soil_moisture} unit="%" icon={Sprout} imageSrc={imgSoil} valueColor="text-brand-red" />
@@ -183,8 +174,6 @@ export const EnvironmentParametersPage: React.FC = () => {
           </div>
 
           <ChartCard title={`Lịch sử ${activeChartConfig.label}`}>
-
-            {/* Thanh Tabs chọn Loại Biểu Đồ */}
             <div className="flex gap-2 mb-4 border-b border-gray-100 pb-2 overflow-x-auto hide-scrollbar">
               {CHART_TABS.map(tab => (
                 <button
@@ -203,7 +192,6 @@ export const EnvironmentParametersPage: React.FC = () => {
               {isChartLoading && <RefreshCw size={18} className="animate-spin text-gray-400 ml-auto my-auto" />}
             </div>
 
-            {/* Gọi Component Render Biểu Đồ */}
             <div className="w-full h-70">
               {chartData.length > 0 ? (
                 <EnvHistoryChart
@@ -223,7 +211,6 @@ export const EnvironmentParametersPage: React.FC = () => {
           </ChartCard>
         </div>
 
-        {/* KHỐI ĐÁNH GIÁ MÔI TRƯỜNG */}
         <div className="col-span-1 flex flex-col">
           <div className="bg-[#f0f9f1] border-2 border-brand-green/30 rounded-xl p-6 flex flex-col h-full shadow-sm">
             <h3 className="text-xl font-bold text-brand-green mb-4">Đánh giá môi trường</h3>

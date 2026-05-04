@@ -97,7 +97,6 @@ export const GlobalDashboardPage: React.FC = () => {
 
   const { zones, logs, sensorsCount, devices } = data;
 
-  // Tính toán trung bình
   const validTempZones = zones.filter(z => z.temp > 0);
   const avgTemp = validTempZones.length ? (validTempZones.reduce((a, c) => a + c.temp, 0) / validTempZones.length).toFixed(1) : "0";
   const avgHumid = zones.length ? (zones.reduce((a, c) => a + c.humidity, 0) / zones.length).toFixed(1) : "0";
@@ -113,7 +112,6 @@ export const GlobalDashboardPage: React.FC = () => {
 
   return (
     <div className="p-8 flex-1 flex flex-col gap-6 bg-gray-50 overflow-y-auto">
-      {/* Header */}
       <div className="flex justify-between items-end">
         <div>
           <h2 className="text-4xl font-bold text-brand-green uppercase">Trung tâm điều khiển</h2>
@@ -124,14 +122,12 @@ export const GlobalDashboardPage: React.FC = () => {
         </button>
       </div>
 
-      {/* KPI Cards */}
       <div className="grid grid-cols-2 gap-4">
         {kpiCards.map((k, i) => (
           <StatCard key={i} icon={k.icon} label={k.label} value={k.val.toString()} unit={k.unit} />
         ))}
       </div>
 
-      {/* Danh sách Khu vực */}
       <div className="bg-white p-5 rounded-2xl shadow-sm border border-gray-100">
         <div className="flex justify-between items-center mb-4">
           <h3 className="font-bold text-brand-green uppercase text-xl">Chi tiết phân khu</h3>
@@ -165,7 +161,6 @@ export const GlobalDashboardPage: React.FC = () => {
               </ResponsiveContainer>
             </div>
 
-            {/* Biểu đồ Tròn */}
             <div className="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 flex flex-col items-center">
               <h3 className="font-bold text-brand-green uppercase text-lg w-full mb-2">Trạng thái Thiết bị</h3>
               <div className="flex-1 w-full relative">

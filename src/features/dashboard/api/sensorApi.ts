@@ -23,19 +23,16 @@ export interface SensorData {
 }
 
 export const sensorApi = {
-  // Endpoint: GET /sensor/
   getAllSensors: async (): Promise<SensorData[]> => {
     const response = await axiosClient.get('/sensor/');
     return response.data;
   },
 
-  // Endpoint: GET /sensor/area/:area_id/latest
   getLatestByArea: async (areaId: number | string): Promise<LatestSensorData[]> => {
     const response = await axiosClient.get(`/sensor/area/${areaId}/latest`);
     return response.data;
   },
 
-  // Endpoint: GET /sensor/area/:area_id/history/:type
   getHistoryByAreaAndType: async (areaId: number | string, type: string): Promise<SensorHistoryData[]> => {
     const response = await axiosClient.get(`/sensor/area/${areaId}/history/${type}`);
     return response.data;
