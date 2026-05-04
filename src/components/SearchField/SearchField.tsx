@@ -129,7 +129,6 @@ export const SearchField: React.FC = () => {
           ) : (
             <div className="overflow-y-auto custom-scrollbar p-2">
               
-              {/* Kết quả: Khu vực */}
               {filteredResults.areas.length > 0 && (
                 <div className="mb-2">
                   <h4 className="text-xs font-bold text-gray-400 uppercase px-3 py-1 tracking-wider">Phân khu</h4>
@@ -151,7 +150,6 @@ export const SearchField: React.FC = () => {
                 </div>
               )}
 
-              {/* Kết quả: Thiết bị */}
               {filteredResults.devices.length > 0 && (
                 <div>
                   <h4 className="text-xs font-bold text-gray-400 uppercase px-3 py-1 tracking-wider">Thiết bị</h4>

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { notificationApi, type AppNotification } from '../../features/notification/notificationApi';
-import { NotificationItem } from './NotificationItem'; // File của bạn
+import { NotificationItem } from './NotificationItem';
 import { RefreshCw } from 'lucide-react';
 
 export const UnreadNotificationsList: React.FC = () => {
@@ -35,8 +35,7 @@ export const UnreadNotificationsList: React.FC = () => {
       {unreadNotifs.map(notif => (
         <NotificationItem 
           key={notif.id}
-          // Chuyển đổi type từ DB sang type của component bạn viết
-          type={notif.type === 'SUCCESS' ? 'success' : 'alert'} 
+          type={notif.type === "INFO" ? "info" : "warning"}
           message={notif.message}
           time={new Date(notif.created_at).toLocaleString('vi-VN')}
         />

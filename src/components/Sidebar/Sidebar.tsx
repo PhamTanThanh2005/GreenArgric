@@ -1,21 +1,27 @@
 import React from 'react';
-import { Home, Thermometer, Radio, Database, Users, Cpu, Sliders } from 'lucide-react';
+import { Home, Thermometer, Radio, Database, Users, Cpu, type LucideIcon } from 'lucide-react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { Button } from '../Button/Button';
 import { cn } from '../../utils';
 
-const navItems = [
+interface NavItem {
+  name: string;
+  icon: LucideIcon;
+  path: string;
+}
+
+const navItems: NavItem[] = [
   { name: 'TRANG CHỦ', icon: Home, path: '/dashboard' },
   { name: 'THÔNG SỐ MÔI TRƯỜNG', icon: Thermometer, path: '/environment' },
   { name: 'ĐIỀU KHIỂN THIẾT BỊ', icon: Radio, path: '/control-device' },
+  { name: 'QUẢN LÝ PHÂN KHU', icon: Thermometer, path: '/manage-area' },
   { name: 'DỮ LIỆU LƯU TRỮ', icon: Database, path: '/storage' },
 ];
 
-const adminNavItems = [
+const adminNavItems: NavItem[] = [
   { name: 'TRANG CHỦ', icon: Home, path: '/admin/dashboard' },
   { name: 'QUẢN LÝ NGƯỜI DÙNG', icon: Users, path: '/admin/users' },
-  { name: 'KHU VỰC VÀ THIẾT BỊ', icon: Cpu, path: '/admin/devices' },
-  { name: 'THIẾT LẬP NGƯỠNG', icon: Sliders, path: '/admin/thresholds' },
+  { name: 'KHU VỰC VÀ THIẾT BỊ', icon: Cpu, path: '/admin/devices' }
 ];
 
 export const Sidebar: React.FC = () => {
@@ -23,7 +29,7 @@ export const Sidebar: React.FC = () => {
   const navigate = useNavigate(); 
   const role = localStorage.getItem('role');
 
-  const renderNavItem = (item: { name: string; icon: any; path: string }) => {
+  const renderNavItem = (item: NavItem) => {
     const Icon = item.icon;
     const isActive = location.pathname.includes(item.path);
 
@@ -46,20 +52,14 @@ export const Sidebar: React.FC = () => {
     );
   };
 
+  const currentNavItems = role === 'admin' ? adminNavItems : navItems;
+
   return (
     <aside className="w-78 h-full flex flex-col p-6 text-white overflow-y-auto custom-scrollbar">
       <nav className="flex flex-col gap-6">
-        
-        {role === 'admin' ? (
-          <div className="flex flex-col gap-4">
-            {adminNavItems.map(renderNavItem)}
-          </div>
-        ) : (
-          <div className="flex flex-col gap-4">
-            {navItems.map(renderNavItem)}
-          </div>
-        )}
-
+        <div className="flex flex-col gap-4">
+          {currentNavItems.map(renderNavItem)}
+        </div>
       </nav>
     </aside>
   );

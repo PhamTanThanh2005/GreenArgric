@@ -45,7 +45,7 @@ export const EnvHistoryChart: React.FC<EnvHistoryChartProps> = ({
             boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' 
           }}
           
-          formatter={(value: number | string | undefined) => {
+          formatter={(value) => {
             if (value === undefined || value === null) return ['Không có dữ liệu', 'Giá trị'];
             return [`${value} ${unit}`, 'Giá trị'];
           }}

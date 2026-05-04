@@ -9,26 +9,22 @@ import { DeviceHistoryChart } from '../components/Charts/DeviceHistoryChart';
 import { DeviceDurationChart } from '../components/Charts/DeviceDurationChart';
 import { cn } from '../utils';
 
-import envBg from '../assets/storage/env.png'; 
-import deviceBg from '../assets/storage/dev.png'; 
+import envBg from '../assets/storage/env.png';
+import deviceBg from '../assets/storage/dev.png';
 
 type TabType = 'environment' | 'device' | null;
-type DeviceViewMode = 'frequency' | 'duration'; 
-
+type DeviceViewMode = 'frequency' | 'duration';
 interface ChartDevice {
   id: number;
   name: string;
   type: string;
   data: Array<{ name: string; autoOn: number; manualOn: number; off: number; durationHours: number }>;
 }
-
 interface EnvDataPoint {
   [key: string]: string | number;
   time: string;
   value: number;
 }
-
-// Bổ sung Interface để bắt kiểu chặt chẽ cho thiết bị
 interface DeviceData {
   id: number;
   device_name: string;
@@ -41,8 +37,8 @@ interface DeviceData {
 
 export const DataStoragePage: React.FC = () => {
   const [activeTab, setActiveTab] = useState<TabType>('environment');
-  const [deviceViewMode, setDeviceViewMode] = useState<DeviceViewMode>('frequency'); 
-  
+  const [deviceViewMode, setDeviceViewMode] = useState<DeviceViewMode>('frequency');
+
   const [areas, setAreas] = useState<AreaData[]>([]);
   const [selectedAreaId, setSelectedAreaId] = useState<number | null>(null);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
@@ -53,12 +49,11 @@ export const DataStoragePage: React.FC = () => {
     moisture: EnvDataPoint[];
     light: EnvDataPoint[];
   }>({ temp: [], soil_moisture: [], moisture: [], light: [] });
-  const [isEnvLoading, setIsEnvLoading] = useState(false);
 
+  const [isEnvLoading, setIsEnvLoading] = useState(false);
   const [devicesData, setDevicesData] = useState<ChartDevice[]>([]);
   const [isDeviceLoading, setIsDeviceLoading] = useState(false);
 
-  // Lấy danh sách khu vực
   useEffect(() => {
     const fetchAreas = async () => {
       try {
@@ -74,44 +69,42 @@ export const DataStoragePage: React.FC = () => {
 
   const currentArea = areas.find(a => a.id === selectedAreaId);
 
-  // FETCH MÔI TRƯỜNG
   useEffect(() => {
     if (activeTab !== 'environment' || !selectedAreaId) return;
-    
+
     const fetchAllEnvData = async () => {
       setIsEnvLoading(true);
       try {
         const types = ['temp', 'soil_moisture', 'moisture', 'light'];
-        
+
         const results = await Promise.all(
-          types.map(type => 
+          types.map(type =>
             sensorApi.getHistoryByAreaAndType(selectedAreaId.toString(), type)
-              .catch(() => [] as SensorHistoryData[]) 
+              .catch(() => [] as SensorHistoryData[])
           )
         );
 
-        const formatData = (data: SensorHistoryData[]): EnvDataPoint[] => 
+        const formatData = (data: SensorHistoryData[]): EnvDataPoint[] =>
           data.map(item => ({
-            time: new Date(item.time).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' }), 
+            time: new Date(item.time).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' }),
             value: item.value
           })).reverse();
 
-        setEnvData({ 
-          temp: formatData(results[0]), 
-          soil_moisture: formatData(results[1]), 
-          moisture: formatData(results[2]), 
-          light: formatData(results[3]) 
+        setEnvData({
+          temp: formatData(results[0]),
+          soil_moisture: formatData(results[1]),
+          moisture: formatData(results[2]),
+          light: formatData(results[3])
         });
-      } catch (error) { 
-        console.error("Lỗi khi tải dữ liệu môi trường:", error); 
-      } finally { 
-        setIsEnvLoading(false); 
+      } catch (error) {
+        console.error("Lỗi khi tải dữ liệu môi trường:", error);
+      } finally {
+        setIsEnvLoading(false);
       }
     };
     fetchAllEnvData();
   }, [selectedAreaId, activeTab]);
 
-  // FETCH & BIẾN ĐỔI DỮ LIỆU THIẾT BỊ DỰA THEO ID THIẾT BỊ
   useEffect(() => {
     if (activeTab !== 'device' || !currentArea) return;
 
@@ -123,55 +116,49 @@ export const DataStoragePage: React.FC = () => {
 
         const parsedDevicesData: ChartDevice[] = await Promise.all(
           areaDevices.map(async (device) => {
+
             const deviceLogs = await activityApi.getByDevice(device.id).catch(() => []);
-            
             const monthlyData: Record<string, { name: string, autoOn: number, manualOn: number, off: number, durationHours: number }> = {};
-            
             const sortedLogs = deviceLogs.sort((a, b) => new Date(a.time).getTime() - new Date(b.time).getTime());
-            
+
             let lastOnTime: Date | null = null;
 
             sortedLogs.forEach(log => {
               const date = new Date(log.time);
               const month = date.toLocaleString('en-US', { month: 'short' });
-              
+
               if (!monthlyData[month]) {
                 monthlyData[month] = { name: month, autoOn: 0, manualOn: 0, off: 0, durationHours: 0 };
               }
-
-              // Tính Tần suất
               if (log.mode === 'ON' && log.source === 'auto') monthlyData[month].autoOn += 1;
               else if (log.mode === 'ON' && log.source === 'manual') monthlyData[month].manualOn += 1;
-              else if (log.mode === 'OFF') monthlyData[month].off += 1; 
+              else if (log.mode === 'OFF') monthlyData[month].off += 1;
 
-              // Tính Thời lượng hoạt động
               if (log.mode === 'ON') {
                 if (!lastOnTime) lastOnTime = date;
               } else if (log.mode === 'OFF') {
                 if (lastOnTime) {
                   const durationMs = date.getTime() - lastOnTime.getTime();
-                  const durationHours = durationMs / (1000 * 60 * 60); 
+                  const durationHours = durationMs / (1000 * 60 * 60);
                   monthlyData[month].durationHours += durationHours;
                   lastOnTime = null; // Reset bộ đếm
                 }
               }
             });
 
-            // Làm tròn tổng số giờ
             Object.values(monthlyData).forEach(m => { m.durationHours = Number(m.durationHours.toFixed(2)); });
 
             const monthsOrder = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
             const sortedChartData = Object.values(monthlyData).sort((a, b) => monthsOrder.indexOf(a.name) - monthsOrder.indexOf(b.name));
-
             return { id: device.id, name: device.device_name, type: device.type, data: sortedChartData };
           })
         );
 
         setDevicesData(parsedDevicesData);
-      } catch (error) { 
-        console.error("Lỗi khi tải dữ liệu thiết bị:", error); 
-      } finally { 
-        setIsDeviceLoading(false); 
+      } catch (error) {
+        console.error("Lỗi khi tải dữ liệu thiết bị:", error);
+      } finally {
+        setIsDeviceLoading(false);
       }
     };
 
@@ -181,13 +168,13 @@ export const DataStoragePage: React.FC = () => {
   const handleDownload = (filename: string) => alert(`Chức năng xuất File CSV cho ${filename} sẽ cập nhật sau!`);
 
   const getDeviceColors = (type: string) => {
-    if (type === 'light') return ["#0ea5e9", "#3b82f6", "#e0f2fe"]; 
-    return ["#16a34a", "#86efac", "#fee2e2"]; 
+    if (type === 'light') return ["#0ea5e9", "#3b82f6", "#e0f2fe"];
+    return ["#16a34a", "#86efac", "#fee2e2"];
   };
 
   return (
     <div className="bg-white rounded-tl-[40px] p-8 flex-1 overflow-y-auto h-full shadow-inner relative">
-      
+
       <div className="flex justify-between items-center mb-8 relative z-20">
         <h1 className="text-3xl font-bold text-brand-green uppercase">Dữ liệu lưu trữ</h1>
         <div className="relative">
@@ -228,13 +215,13 @@ export const DataStoragePage: React.FC = () => {
         <div className="animate-in fade-in duration-500">
           <div className="flex justify-center mb-6">
             <div className="bg-gray-100 p-1 rounded-xl flex items-center shadow-inner">
-              <button 
+              <button
                 onClick={() => setDeviceViewMode('frequency')}
                 className={cn("flex items-center gap-2 px-6 py-2.5 rounded-lg font-bold transition-all", deviceViewMode === 'frequency' ? "bg-white text-brand-green shadow-sm" : "text-gray-500 hover:text-gray-700")}
               >
                 <Activity size={18} /> Số lần hoạt động
               </button>
-              <button 
+              <button
                 onClick={() => setDeviceViewMode('duration')}
                 className={cn("flex items-center gap-2 px-6 py-2.5 rounded-lg font-bold transition-all", deviceViewMode === 'duration' ? "bg-white text-orange-500 shadow-sm" : "text-gray-500 hover:text-gray-700")}
               >

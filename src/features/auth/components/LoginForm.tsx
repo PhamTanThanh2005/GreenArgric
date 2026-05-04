@@ -25,8 +25,6 @@ export const LoginForm: React.FC<LoginFormProps> = ({ role }) => {
 
     try {
       const data = await loginUser({ username, password });
-
-      console.log("Dữ liệu Backend trả về:", data);
       
       localStorage.setItem('token', data.token);
       localStorage.setItem('role', data.user.role); 
@@ -54,7 +52,6 @@ export const LoginForm: React.FC<LoginFormProps> = ({ role }) => {
 
   return (
     <div className="w-full h-110 flex">
-      {/* CỘT TRÁI: Form nhập thông tin */}
       <div className="w-2/3 px-12 flex flex-col justify-center">
         <p className="text-sm text-black font-medium font-playwrite mb-1">
           Xin chào {role === 'Quản trị viên' ? 'admin' : 'Chủ vườn'},
@@ -103,7 +100,6 @@ export const LoginForm: React.FC<LoginFormProps> = ({ role }) => {
         </form>
       </div>
 
-      {/* CỘT PHẢI: Nền xanh và logo */}
       <div className="w-1/3 bg-brand-green p-8 flex items-center justify-center rounded-br-2xl overflow-visible">
         <img src="/images/logo-green.png" alt="" className='w-45 h-45' />
       </div>

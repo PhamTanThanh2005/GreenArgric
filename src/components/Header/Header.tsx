@@ -13,12 +13,10 @@ export const Header: React.FC = () => {
   const [isLoggedIn, setIsLoggedIn] = useState<boolean>(() => !!localStorage.getItem('token'));
   const [username, setUsername] = useState<string | null>(() => localStorage.getItem('username'));
 
-  // --- STATES CHO NOTIFICATION ---
   const [notifications, setNotifications] = useState<AppNotification[]>([]);
   const [isNotifOpen, setIsNotifOpen] = useState(false);
   const notifRef = useRef<HTMLDivElement>(null);
 
-  // Kiểm tra Auth
   useEffect(() => {
     const checkAuthStatus = () => {
       const token = localStorage.getItem('token');
@@ -34,7 +32,6 @@ export const Header: React.FC = () => {
     };
   }, [location]);
 
-  // Fetch Thông báo
   useEffect(() => {
     if (isLoggedIn) {
       const fetchNotifs = async () => {
@@ -46,13 +43,11 @@ export const Header: React.FC = () => {
         }
       };
       fetchNotifs();
-      // Auto refresh thông báo mỗi 30s
       const interval = setInterval(fetchNotifs, 30000);
       return () => clearInterval(interval);
     }
   }, [isLoggedIn]);
 
-  // Đóng Popup khi click ra ngoài
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (notifRef.current && !notifRef.current.contains(event.target as Node)) {
@@ -94,7 +89,6 @@ export const Header: React.FC = () => {
   const isLandingPage = location.pathname === '/';
   const showActions = isLoggedIn && !isLandingPage;
 
-  // Tính số lượng thông báo chưa đọc
   const unreadCount = notifications.filter(n => !n.is_read).length;
 
   return (
@@ -112,7 +106,6 @@ export const Header: React.FC = () => {
       <div className="flex items-center px-2 py-0.5 gap-6">
         {showActions && (
           <>
-            {/* Vùng chứa Chuông Thông báo */}
             <div className="relative" ref={notifRef}>
               <div className="bg-white rounded-full">
                 <button
@@ -120,14 +113,12 @@ export const Header: React.FC = () => {
                   className="p-2 text-brand-green cursor-pointer transition-colors relative flex items-center justify-center"
                 >
                   <Bell size={20} strokeWidth={2.5} />
-                  {/* Chấm đỏ chỉ hiện khi có thông báo chưa đọc */}
                   {unreadCount > 0 && (
                     <span className="absolute top-1.5 right-1.5 w-2.5 h-2.5 bg-brand-red rounded-full border border-white"></span>
                   )}
                 </button>
               </div>
 
-              {/* DROPDOWN THÔNG BÁO (HIỂN THỊ TẤT CẢ) */}
               {isNotifOpen && (
                 <div className="absolute top-full right-0 mt-3 w-80 bg-white rounded-xl shadow-2xl border border-gray-100 overflow-hidden z-50">
                   <div className="bg-gray-50 px-4 py-3 border-b border-gray-100 flex justify-between items-center">
@@ -145,7 +136,6 @@ export const Header: React.FC = () => {
                           onClick={() => handleReadNotification(notif.id, notif.is_read)}
                           className={cn(
                             "px-4 py-3 border-b border-gray-50 cursor-pointer transition-colors flex gap-3",
-                            // Logic màu: Đã đọc -> Nền xám, Chưa đọc -> Nền trắng/xanh nhạt
                             notif.is_read ? "bg-gray-100 opacity-70" : "bg-white hover:bg-green-50"
                           )}
                         >

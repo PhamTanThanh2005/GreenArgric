@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { 
+import {
   Users, Cpu, Server, CheckCircle2,
-  RefreshCw, UserPlus, Sliders, Activity, 
+  RefreshCw, UserPlus, Sliders, Activity,
   PowerOff
 } from 'lucide-react';
 
@@ -34,8 +34,7 @@ interface DeviceData {
 export const AdminDashboardPage: React.FC = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
-  
-  // States tổng hợp
+
   const [stats, setStats] = useState({
     totalUsers: 0,
     adminCount: 0,
@@ -53,7 +52,6 @@ export const AdminDashboardPage: React.FC = () => {
   const loadAdminData = async () => {
     setLoading(true);
     try {
-      // Fetch song song các dữ liệu tổng quan
       const [usersData, areas, devicesRaw] = await Promise.all([
         axiosClient.get('/user').then(res => res.data as UserData[]).catch(() => []),
         areaApi.getAll().catch(() => []),
@@ -62,12 +60,8 @@ export const AdminDashboardPage: React.FC = () => {
       ]);
 
       const devices = devicesRaw as DeviceData[];
-
-      // 1. Thống kê User
       const admins = usersData.filter(u => u.role === 'admin').length;
       const owners = usersData.filter(u => u.role === 'owner').length;
-
-      // 2. Thống kê Thiết bị (Chỉ đếm BẬT / TẮT dựa vào mode)
       const devicesOn = devices.filter(d => d.mode === 'ON').length;
 
       setStats({
@@ -93,7 +87,7 @@ export const AdminDashboardPage: React.FC = () => {
 
   useEffect(() => {
     loadAdminData();
-    const interval = setInterval(loadAdminData, 60000); // Tự động làm mới mỗi 1 phút
+    const interval = setInterval(loadAdminData, 60000); // Refesh sau 1 phút
     return () => clearInterval(interval);
   }, []);
 
@@ -107,13 +101,11 @@ export const AdminDashboardPage: React.FC = () => {
 
   return (
     <div className="p-8 flex-1 flex flex-col gap-6 bg-gray-50 overflow-y-auto h-full">
-      {/* 1. Header & Lối tắt thao tác */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-4">
         <div>
           <h2 className="text-4xl font-bold text-brand-green uppercase">Tổng quan Quản trị</h2>
-          <p className="text-gray-500 mt-1">Giám sát hoạt động hệ thống và tài nguyên</p>
         </div>
-        
+
         <div className="flex items-center gap-3">
           <button onClick={() => navigate('/admin/users')} className="flex items-center gap-2 bg-white px-4 py-2.5 rounded-xl shadow-sm text-gray-700 hover:bg-gray-50 border border-gray-200 transition-all font-semibold cursor-pointer">
             <UserPlus size={18} className="text-blue-600" /> Quản lý User
@@ -127,7 +119,6 @@ export const AdminDashboardPage: React.FC = () => {
         </div>
       </div>
 
-      {/* 2. Dải KPI Hệ thống */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         <StatCard icon={Server} label="Phân khu hoạt động" value={stats.totalZones.toString()} unit="Khu" />
         <StatCard icon={Users} label="Tổng Tài khoản" value={stats.totalUsers.toString()} unit="User" />
@@ -137,27 +128,24 @@ export const AdminDashboardPage: React.FC = () => {
 
       <div className="grid grid-cols-1 gap-6">
         <div className="flex flex-col gap-6">
-          
-          {/* Trạng thái Bật/Tắt Thiết bị */}
           <div className="bg-white p-6 rounded-3xl shadow-sm border border-gray-100">
             <h3 className="text-lg font-bold text-gray-800 mb-6 flex items-center gap-2">
               <Cpu className="text-brand-green" /> Trạng thái hoạt động thiết bị
             </h3>
-            
+
             <div className="flex items-center justify-between mb-2">
               <span className="text-gray-600 font-medium">Tỷ lệ thiết bị đang BẬT</span>
               <span className="text-xl font-extrabold text-brand-green">
                 {deviceHealth.total > 0 ? Math.round((deviceHealth.on / deviceHealth.total) * 100) : 0}%
               </span>
             </div>
-            
-            {/* Thanh Progress */}
+
             <div className="w-full h-4 bg-gray-100 rounded-full overflow-hidden flex mb-6">
-              <div 
+              <div
                 className="bg-brand-green h-full transition-all duration-1000"
                 style={{ width: `${(deviceHealth.on / deviceHealth.total) * 100}%` }}
               ></div>
-              <div 
+              <div
                 className="bg-gray-300 h-full transition-all duration-1000"
                 style={{ width: `${(deviceHealth.off / deviceHealth.total) * 100}%` }}
               ></div>
@@ -181,7 +169,6 @@ export const AdminDashboardPage: React.FC = () => {
             </div>
           </div>
 
-          {/* Phân bổ tài khoản */}
           <div className="bg-white p-6 rounded-3xl shadow-sm border border-gray-100">
             <div className="flex justify-between items-center mb-4">
               <h3 className="text-lg font-bold text-gray-800 flex items-center gap-2">
@@ -202,9 +189,7 @@ export const AdminDashboardPage: React.FC = () => {
               </div>
             </div>
           </div>
-
         </div>
-
       </div>
     </div>
   );

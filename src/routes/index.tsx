@@ -16,6 +16,7 @@ import { AdminDashboardPage } from '../pages/AdminDashboardPage';
 import { AdminDashboardLayout } from '../layouts/AdminDashboardLayout';
 import { ManageUsersPage } from '../pages/ManageUsersPage';
 import { ManageDevicesPage } from '../pages/ManageDevicesPage';
+import { OwnerAreaPage } from '../pages/OwnerAreaPage';
 
 export const AppRoutes: React.FC = () => {
   return (
@@ -37,15 +38,15 @@ export const AppRoutes: React.FC = () => {
           <Route path="/profile" element={<ProfilePage />} />
           <Route path="/environment" element={<EnvironmentParametersPage />} />
           <Route path="/storage" element={<DataStoragePage />} />
+          <Route path="/manage-area" element={<OwnerAreaPage />} />
         </Route>
 
-        {/* NHÓM CÁC ROUTE PHÂN QUYỀN ADMIN */}
+        {/* ADMIN */}
         <Route element={<AdminRoute />}>
           <Route element={<AdminDashboardLayout />}>
             <Route path="/admin/dashboard" element={<AdminDashboardPage />} />
             <Route path="/admin/users" element={<ManageUsersPage />} />
             <Route path="/admin/devices" element={<ManageDevicesPage />} />
-            
           </Route>
         </Route>
 

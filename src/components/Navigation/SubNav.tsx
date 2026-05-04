@@ -13,11 +13,9 @@ export const SubNav: React.FC = () => {
   const dropdownRef = useRef<HTMLDivElement>(null);
   const [areas, setAreas] = useState<AreaData[]>([]);
   
-  // Lấy role từ bộ nhớ để phân quyền UI
   const role = localStorage.getItem('role');
 
   useEffect(() => {
-    // Admin không cần gọi API lấy danh sách khu vực ở SubNav để tối ưu hiệu suất
     if (role === 'admin') return; 
 
     const fetchAreas = async () => {
@@ -44,13 +42,13 @@ export const SubNav: React.FC = () => {
   const getCurrentPageName = () => {
     const path = location.pathname;
     
-    // Các trang của Owner
+    // Owner
     if (path.includes('/control-device')) return 'Điều khiển thiết bị';
     if (path.includes('/environment')) return 'Thông số môi trường';
     if (path.includes('/profile')) return 'Hồ sơ cá nhân';
     if (path.includes('/storage')) return 'Dữ liệu lưu trữ';
     
-    // Các trang của Admin
+    // Admin
     if (path.includes('/admin/dashboard')) return 'Tổng quan Quản trị';
     if (path.includes('/admin/users')) return 'Quản lý Người dùng';
     if (path.includes('/admin/devices')) return 'Quản lý Thiết bị';
@@ -65,14 +63,11 @@ export const SubNav: React.FC = () => {
   return (
     <nav className="w-full flex items-center justify-between h-12 bg-[#f0f2f5] pr-6 border-b border-gray-200">
       
-      {/* KHU VỰC TRÁI: Nút Menu & Breadcrumbs */}
       <div className="flex items-center h-full">
-        {/* Nút Hamburger Menu */}
         <button className="flex items-center justify-center h-full px-6 hover:bg-gray-200 transition-colors cursor-pointer">
           <Menu size={28} className="text-brand-green stroke-[2.5px]" />
         </button>
 
-        {/* Breadcrumbs */}
         <div className="flex items-center px-4 text-sm font-semibold text-gray-500">
           <Link 
             to={role === 'admin' ? "/admin/dashboard" : "/dashboard"} 
@@ -89,7 +84,6 @@ export const SubNav: React.FC = () => {
         </div>
       </div>
 
-      {/* KHU VỰC PHẢI: Dropdown Chọn Khu Vực (CHỈ HIỂN THỊ NẾU KHÔNG PHẢI ADMIN) */}
       {role !== 'admin' && (
         <div className="relative" ref={dropdownRef}>
           <button
@@ -106,7 +100,6 @@ export const SubNav: React.FC = () => {
             <ChevronDown size={16} className={cn("transition-transform", isDropdownOpen && "rotate-180")} />
           </button>
 
-          {/* Menu thả xuống - Render động từ API */}
           {isDropdownOpen && (
             <div className="absolute top-full right-0 mt-2 w-56 bg-white rounded-xl shadow-2xl border-2 border-brand-green py-2 z-50 overflow-hidden">
               <div className="px-4 py-2 border-b border-gray-50 mb-1">

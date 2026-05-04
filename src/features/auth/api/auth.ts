@@ -7,13 +7,13 @@ export interface LoginCredentials {
 
 export interface UserInfo {
   id: number;
-  name: string;
+  username: string;
   role: string;
 }
 
 export interface LoginResponse {
   message: string;
-  access_token: string;
+  token: string;
   user: UserInfo;
 }
 

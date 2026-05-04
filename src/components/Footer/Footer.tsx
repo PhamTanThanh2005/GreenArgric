@@ -4,8 +4,6 @@ import wage from "../../assets/wage.png"
 export const Footer: React.FC = () => {
   return (
     <div className="relative mt-auto w-full z-10">
-      
-      {/* Phần hình sóng */}
       <div className="relative z-0 w-full overflow-hidden drop-shadow-[0_-15px_30px_rgba(0,0,0,0.08)] -mb-1">
         <img
           src={wage}

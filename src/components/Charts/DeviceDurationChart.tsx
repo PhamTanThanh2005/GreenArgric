@@ -11,7 +11,7 @@ interface DeviceDurationChartProps {
 
 export const DeviceDurationChart: React.FC<DeviceDurationChartProps> = ({ 
   data, 
-  color = "#f59e0b" // Mặc định màu vàng cam rực rỡ
+  color = "#f59e0b"
 }) => {
   return (
     <ResponsiveContainer width="100%" height="100%">
@@ -23,7 +23,7 @@ export const DeviceDurationChart: React.FC<DeviceDurationChartProps> = ({
         <Tooltip 
           contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
           cursor={{ fill: '#f3f4f6' }}
-          formatter={(value: number) => [`${value} giờ`, 'Thời gian chạy']}
+          formatter={(value) => [`${value} giờ`, 'Thời gian chạy']}
         />
 
         <Bar 

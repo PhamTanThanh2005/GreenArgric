@@ -24,7 +24,6 @@ export const ControlDevicePage: React.FC = () => {
   const [selectedZone, setSelectedZone] = useState<string | number>('all');
   const [loading, setLoading] = useState(true);
 
-  // Lấy dữ liệu API
   const loadData = async () => {
     try {
       setLoading(true);
@@ -45,12 +44,10 @@ export const ControlDevicePage: React.FC = () => {
     loadData();
   }, []);
 
-  // Tính toán KPI
   const totalDevices = devices.length;
   const activeDevices = devices.filter(d => d.mode === 'ON' || d.status === 1).length;
   const errorDevices = 0;
 
-  // Lọc thiết bị theo khu vực
   const filteredDevices = selectedZone === 'all' 
     ? devices 
     : devices.filter(d => {
@@ -66,7 +63,6 @@ export const ControlDevicePage: React.FC = () => {
 
   return (
     <div className="p-8 flex-1 flex flex-col gap-8 bg-white overflow-y-auto">
-      {/* Tiêu đề trang */}
       <div className="flex justify-between items-end">
         <div>
           <h2 className="text-3xl font-bold text-brand-green uppercase">Điều khiển thiết bị</h2>
@@ -77,14 +73,12 @@ export const ControlDevicePage: React.FC = () => {
         </button>
       </div>
 
-      {/* 2. Các chỉ số cần thiết */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <StatCard icon={Cpu} label="Tổng số thiết bị" value={totalDevices.toString()} unit="Cái" />
         <StatCard icon={Zap} label="Đang hoạt động" value={activeDevices.toString()} unit="Bật" />
         <StatCard icon={AlertCircle} label="Thiết bị gặp lỗi" value={errorDevices.toString()} unit="Lỗi" />
       </div>
 
-      {/* Lựa chọn Khu vực */}
       <div className="flex flex-col gap-4">
         <div className="flex items-center gap-2 text-gray-700 font-bold">
           <LayoutGrid size={20} className="text-brand-green" />
@@ -121,7 +115,6 @@ export const ControlDevicePage: React.FC = () => {
         </div>
       </div>
 
-      {/* Danh sách thiết bị */}
       <div className="flex flex-col gap-4">
         <div className="flex justify-between items-center border-b border-gray-100 pb-2">
           <h3 className="text-lg font-bold text-gray-800">

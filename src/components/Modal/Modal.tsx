@@ -35,7 +35,6 @@ export const Modal: React.FC<ModalProps> = ({ isOpen, onClose, children, classNa
                         </button>
                     </div>
 
-                    {/* Nội dung trong modal */}
                     {children}
                 </div>
             </div>

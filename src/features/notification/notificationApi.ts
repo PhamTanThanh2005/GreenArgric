@@ -4,13 +4,12 @@ export interface AppNotification {
   id: number;
   title: string;
   message: string;
-  type: string; // VD: 'WARNING', 'SUCCESS', 'INFO'
+  type: string; // VD: 'WARNING', 'ERROR', 'INFO'
   is_read: boolean | number;
   created_at: string;
 }
 
 export const notificationApi = {
-  // Lấy tất cả thông báo
   getAll: async (): Promise<AppNotification[]> => {
     const response = await axiosClient.get('/notification');
     return response.data;

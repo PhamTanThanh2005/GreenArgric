@@ -2,18 +2,14 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ThermometerSun, Sprout, Droplets, Sun, ArrowLeft, RefreshCw, Cpu, Clock } from 'lucide-react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
-
-// Components
 import { StatCard } from '../features/dashboard/components/StatCard';
 import { ZoneBannerCard } from '../features/dashboard/components/ZoneBannerCard';
 
-// APIs & Types
 import { areaApi, type AreaData } from '../features/dashboard/api/areaApi';
 import { sensorApi } from '../features/dashboard/api/sensorApi';
 import { activityApi, type ActivityLog } from '../features/dashboard/api/activityApi';
 import { fetchDevices } from '../features/device/api/deviceApi';
 
-// --- ĐỊNH NGHĨA KIỂU DỮ LIỆU ---
 interface DeviceData {
   id: number;
   device_name: string;
@@ -55,7 +51,6 @@ export const ZoneDashboardPage: React.FC = () => {
     setLoading(true);
 
     try {
-      // 1. Gọi tất cả API cần thiết
       const [areas, latestSensors, allDevicesRaw, allLogs, tempHistory] = await Promise.all([
         areaApi.getAll(),
         sensorApi.getLatestByArea(zoneId),
@@ -64,16 +59,13 @@ export const ZoneDashboardPage: React.FC = () => {
         sensorApi.getHistoryByAreaAndType(zoneId, 'temp').catch(() => []) // Catch lỗi nếu chưa có lịch sử
       ]);
 
-      // 2. Lấy thông tin khu vực hiện tại
       const currentArea = areas.find(a => a.id.toString() === zoneId);
       if (!currentArea) throw new Error("Không tìm thấy khu vực");
 
-      // 3. Lọc Thiết bị & Lịch sử hoạt động thuộc về khu vực này
       const allDevices = allDevicesRaw as DeviceData[];
       const zoneDevices = allDevices.filter(d => d.area_name === currentArea.name);
       const zoneLogs = allLogs.filter(l => l.area_name === currentArea.name).slice(0, 5);
 
-      // 4. Map dữ liệu Cảm biến
       let temp = '--', soil = '--', humid = '--', light = '--';
       latestSensors.forEach(s => {
         if (s.type === 'temp') temp = s.value.toString();
@@ -82,11 +74,10 @@ export const ZoneDashboardPage: React.FC = () => {
         if (s.type === 'light') light = s.value.toString();
       });
 
-      // 5. Chuẩn bị dữ liệu cho biểu đồ (Lấy 10 mốc gần nhất)
       const chartData: ChartData[] = tempHistory.map(h => ({
         time: new Date(h.time).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' }),
         temp: h.value
-      })).slice(-10);
+      })).slice(0, 15);
 
       setData({
         areaInfo: currentArea,
@@ -111,17 +102,15 @@ export const ZoneDashboardPage: React.FC = () => {
 
   const { areaInfo, sensors, devices, logs, history } = data;
 
-  // Mảng cấu hình KPI Sensors để render gọn gàng
   const sensorCards = [
     { icon: ThermometerSun, label: "Nhiệt độ", value: sensors.temp, unit: "°C" },
     { icon: Sprout, label: "Độ ẩm đất", value: sensors.soil, unit: "%" },
     { icon: Droplets, label: "Độ ẩm KK", value: sensors.humid, unit: "%" },
-    { icon: Sun, label: "Ánh sáng", value: sensors.light, unit: "lux" }
+    { icon: Sun, label: "Ánh sáng", value: sensors.light, unit: "%" }
   ];
 
   return (
     <div className="p-8 flex-1 flex flex-col gap-6 bg-gray-50 overflow-y-auto">
-      {/* Header */}
       <div className="flex items-center gap-4">
         <button onClick={() => navigate('/dashboard')} className="p-2 bg-white border border-gray-200 hover:bg-gray-100 rounded-full transition-colors">
           <ArrowLeft size={24} className="text-gray-600" />
@@ -141,12 +130,10 @@ export const ZoneDashboardPage: React.FC = () => {
       </div>
 
       <div className="grid grid-cols-1">
-        {/* Banner */}
         <div className="mb-6">
           <ZoneBannerCard zoneName={areaInfo.name} cropType={areaInfo.description} />
         </div>
 
-        {/* Các thẻ chỉ số Cảm biến */}
         <div className="col-span-2 grid grid-cols-2 gap-4">
           {sensorCards.map((s, idx) => (
             <StatCard key={idx} icon={s.icon} label={s.label} value={s.value} unit={s.unit} />
@@ -175,7 +162,6 @@ export const ZoneDashboardPage: React.FC = () => {
         </div>
       </div>
 
-      {/* Phần Thiết bị & Biểu đồ */}
       <div className="grid grid-cols-2 mt-2 gap-6">
 
         <div className="flex flex-col gap-6">

@@ -3,24 +3,24 @@ import { Bell, AlertTriangle } from 'lucide-react';
 import { cn } from '../../utils';
 
 interface NotificationItemProps {
-  type: 'success' | 'alert';
+  type: 'info' | 'warning' | 'error';
   message: string;
   time: string;
 }
 
 export const NotificationItem: React.FC<NotificationItemProps> = ({ type, message, time }) => {
-  const Icon = type === 'success' ? Bell : AlertTriangle;
+  const Icon = type === 'info' ? Bell : AlertTriangle;
   return (
     <div className={cn(
-        "rounded-xl shadow-md p-5 flex items-start gap-4 border",
-        type === 'success' ? 'bg-[#f0fdf4] border-[#86efac]' : 'bg-[#fef2f2] border-[#fca5a5]'
+        "rounded-xl shadow-md p-5 flex items-start gap-4 border-2",
+        type === 'info' ? 'bg-white border-brand-green' : 'bg-[#fef2f2] border-brand-red'
     )}>
       <div className={cn(
           "rounded-full p-2 flex items-center justify-center shrink-0",
-          type === 'success' ? 'bg-[#d1fae5]' : 'bg-[#fee2e2]'
+          type === 'info' ? 'bg-second-green' : 'bg-[#ecc8c8]'
       )}>
          <Icon size={20} className={cn(
-             type === 'success' ? 'text-[#166534]' : 'text-[#b91c1c]'
+             type === 'info' ? 'text-brand-green' : 'text-brand-red'
          )}/>
       </div>
       <div className="flex-1 flex flex-col gap-1">
