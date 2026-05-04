@@ -2,7 +2,6 @@ import sql from "mssql";
 import pool from "../db.js";
 import { client } from "../mqtt.js";
 import { logActivity, notifyAreaOwners } from "./utils.js";
-import { CONTROL_PUMP, CONTROL_LIGHT } from "../core/const.js";
 
 export async function runAutomationForArea(area_id) {
     console.log(`\x1b[36m[AUTO]\x1b[0m Đang kiểm tra tự động cho Khu vực ID: ${area_id}`);

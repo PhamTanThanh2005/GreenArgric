@@ -14,6 +14,51 @@
 - Microsoft SQL Server (Bản Developer hoặc Express)
 - Tài khoản Server MQTT OhStem (Dành cho việc nhận/gửi tín hiệu phần cứng)
 
+## 🏗 Cấu trúc thư mục (Project Architecture)
+
+Dự án Backend áp dụng kiến trúc module hóa, tách biệt rõ ràng giữa cấu hình, logic xử lý thiết bị (MQTT) và các API (RESTful routes).
+```text
+📦 backend-root
+├── 📂 config/           # Các file cấu hình tĩnh
+│   └── swagger.json     # File định nghĩa API documentation (Swagger/OpenAPI)
+│
+├── 📂 core/             # Logic nghiệp vụ cốt lõi của hệ thống IoT
+│   ├── automation.js    # Logic xử lý tự động hóa (VD: kiểm tra ngưỡng bật/tắt thiết bị)
+│   ├── const.js         # Khai báo các hằng số (constants) dùng chung
+│   └── utils.js         # Các hàm tiện ích cốt lõi dùng cho nghiệp vụ
+│
+├── 📂 database/         # Script khởi tạo cơ sở dữ liệu (MySQL/PostgreSQL)
+│   ├── GA-data.sql      # Script chèn dữ liệu mẫu (Mock data/Seeders)
+│   └── GA-database.sql  # Script tạo cấu trúc bảng (DDL - Schema)
+│
+├── 📂 middleware/       # Các Express middlewares (Xử lý chặn ngang request)
+│   └── auth.js          # Middleware xác thực token (Authentication/Authorization)
+│
+├── 📂 routes/           # Định nghĩa các RESTful API endpoints (Routers & Controllers)
+│   ├── activity.js      # API lịch sử hoạt động thiết bị
+│   ├── area.js          # API quản lý khu vực (zone/area)
+│   ├── auth.js          # API đăng nhập, xác thực
+│   ├── device.js        # API điều khiển và lấy trạng thái thiết bị
+│   ├── notification.js  # API quản lý thông báo, cảnh báo
+│   ├── sensor.js        # API dữ liệu lịch sử/hiện tại của cảm biến
+│   ├── threshold.js     # API cấu hình ngưỡng an toàn môi trường
+│   └── user.js          # API quản lý người dùng
+│
+├── 📂 utils/            # Các tiện ích bổ trợ cho ứng dụng web
+│   └── swagger.js       # Khởi tạo UI và route cho Swagger API Docs
+│
+├── .env.example         # File mẫu chứa các biến môi trường (Database credentials, JWT secret...)
+├── .gitignore           # File cấu hình bỏ qua thư mục/file khi push lên Git (VD: node_modules)
+├── db.js                # Cấu hình và khởi tạo kết nối Database
+├── index.js             # Entry point (File chạy chính, khởi tạo Express server)
+├── mqtt.js              # Cấu hình client MQTT, lắng nghe và gửi bản tin tới thiết bị
+├── package.json         # Khai báo thông tin dự án, scripts và các thư viện (Dependencies)
+├── package-lock.json    # File khóa phiên bản chính xác của thư viện (NPM)
+├── README.md            # Tài liệu hướng dẫn của backend
+├── spec-iot.md          # Tài liệu đặc tả kỹ thuật, giao thức cho hệ thống IoT
+└── tree.txt             # File chứa sơ đồ cấu trúc thư mục (tự sinh)
+```
+
 ## Cài đặt & Khởi chạy
 ### Cài đặt các thư viện
 ```bash
