@@ -1,7 +1,7 @@
 // middleware/auth.js
 import jwt from "jsonwebtoken";
 
-const SECRET_KEY = process.env.JWT_SECRET || "your_secret_key";
+const SECRET_KEY = process.env.JWT_SECRET || "my_secret_key";
 
 export const verifyToken = (req, res, next) => {
     const authHeader = req.headers["authorization"];
