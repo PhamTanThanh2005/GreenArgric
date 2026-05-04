@@ -7,7 +7,6 @@ const router = express.Router();
 
 // ==================================================
 // GET /activity - Lấy lịch sử hoạt động của thiết bị
-// Phân quyền: Admin (thấy tất cả) hoặc Owner (chỉ thấy thiết bị trong khu vực của mình)
 // ==================================================
 router.get("/", verifyToken, async (req, res) => {
     try {

@@ -4,7 +4,7 @@ import pool, { sql } from "../db.js";
 import jwt from "jsonwebtoken";
 
 const router = express.Router();
-const SECRET_KEY = process.env.JWT_SECRET || "your_secret_key";
+const SECRET_KEY = process.env.JWT_SECRET || "my_secret_key";
 
 router.post("/login", async (req, res) => {
     console.log("BODY:", req.body); 
@@ -36,7 +36,7 @@ router.post("/login", async (req, res) => {
                 username: user.username 
             },
             SECRET_KEY,
-            { expiresIn: "1d" }
+            { expiresIn: "1d" } // Expire time: 1 day
         );
 
         res.status(200).json({

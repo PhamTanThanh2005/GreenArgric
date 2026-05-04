@@ -13,7 +13,6 @@ export const verifyToken = (req, res, next) => {
 
     try {
         const decoded = jwt.verify(token, SECRET_KEY);
-        // Lưu thông tin giải mã vào req.user (gồm id, role, username)
         req.user = decoded; 
         next();
     } catch (err) {

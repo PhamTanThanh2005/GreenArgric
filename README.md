@@ -79,6 +79,7 @@ MQTT_FEED=MinhTriDADN/feeds
 | POST   | /sensor                                     | ✅   | 
 | PUT    | /sensor/:id                                 | ✅   |
 | DELETE | /sensor/:id                                 | ✅   |
+| POST | /sensor/data                                 | ✅   |
 
 #### Device
 | Method | Endpoint              | Auth | 
@@ -94,12 +95,13 @@ MQTT_FEED=MinhTriDADN/feeds
 | Method | Endpoint     | Auth | 
 |--------|--------------|------|
 | POST   | /threshold   | ✅   | 
-
+| GET   |/threshold/:area_id| ✅   | 
 
 #### Notification
 | Method | Endpoint        | Auth |
 |--------|----------------|------|
 | GET    | /notification  | ✅   | 
+| POST    |/notification/:id/read| ✅   | 
 
 #### User
 | Method | Endpoint         | Auth | 
@@ -258,6 +260,7 @@ Trả về (Success 200):
   }
 ]
 ```
+
 #### Lấy lịch sử dữ liệu theo Loại cảm biến
 Endpoint: ```GET /sensor/area/:area_id/history/:type```
 
@@ -270,6 +273,7 @@ Trả về (Success 200): Mảng dữ liệu lịch sử để vẽ biểu đồ
   { "value": 26.2, "time": "2026-04-28T14:50:00Z" }
 ]
 ```
+
 #### Thêm mới một cảm biến
 Endpoint: ```POST /sensor```
 
@@ -289,6 +293,7 @@ Trả về (Success 200):
   "message": "Thêm cảm biến thành công"
 }
 ```
+
 #### Cập nhật thông tin cảm biến
 Endpoint: ```PUT /sensor/:id```
 
@@ -314,6 +319,25 @@ Trả về (Success 200):
 ```json
 {
   "message": "Xóa cảm biến thành công"
+}
+```
+
+#### Thêm dữ liệu cảm biến
+Endpoint: `POST /sensor/data`
+
+Mô tả: Thêm giá trị đo đạc mới của một cảm biến cụ thể vào cơ sở dữ liệu.
+
+Nhận vào (Body JSON):
+```json
+{
+  "sensor_id": 1,
+  "value": 26.5
+}
+```
+Trả về (Success 200):
+```json
+{
+  "message": "Thêm dữ liệu thành công"
 }
 ```
 
@@ -470,6 +494,27 @@ Trả về (Success 200):
 { "message": "Thiết lập ngưỡng thành công" }
 ```
 
+Endpoint: `GET /threshold/:area_id`
+
+Mô tả: Trả về danh sách cấu hình các ngưỡng môi trường (tối thiểu, tối đa) cho từng loại cảm biến thuộc một khu vực cụ thể. 
+Phân quyền: Quản trị viên (Admin) xem được tất cả, Chủ vườn (Owner) chỉ xem được khu vực mà mình quản lý.
+
+Trả về (Success 200):
+```json
+[
+  {
+    "sensor_type": "temp",
+    "min_value": 20,
+    "max_value": 35
+  },
+  {
+    "sensor_type": "soil_moisture",
+    "min_value": 40,
+    "max_value": 80
+  }
+]
+```
+
 ### Thông báo (Notification)
 Endpoint: ```GET /notification```
 
@@ -489,7 +534,19 @@ Trả về (Success 200):
 ]
 ```
 
-Endpoint: ```GET /notification```
+Endpoint: `POST /notification/:id/read`
+
+Mô tả: Cập nhật trạng thái của thông báo thành đã đọc (is_read = 1) dựa trên ID thông báo và tài khoản người dùng đang đăng nhập.
+
+Nhận vào: Tham số `:id` của thông báo trên URL.
+
+Trả về (Success 200):
+```json
+{
+  "message": "Đã đánh dấu thông báo là đã đọc"
+}
+```
+
 
 ### Quản lý người dùng
 
@@ -537,6 +594,71 @@ Dữ liệu trả về (JSON):
 }
 ```
 
+Endpoint: `PUT /user/profile`
+
+Mục đích: Cho phép người dùng đang đăng nhập tự cập nhật thông tin cá nhân (Tên, Email, Số điện thoại). 
+
+Nhận vào (Body JSON - Có thể gửi 1 hoặc nhiều trường):
+```json
+{
+  "name": "Nguyễn Văn A (Cập nhật)",
+  "phone": "0988123456"
+}
+```
+
+Trả về (Success: 200):
+```json
+{
+    "message": "Cập nhật thông tin cá nhân thành công"
+}
+``` 
+
+Endpoint: ```POST /user```
+
+Mục đích: Thêm người dùng
+
+Nhận vào (Body JSON):
+```json
+{
+  "username": "chuvuon1",
+  "password": "password123",
+  "name": "Nguyễn Văn A",
+  "role": "owner",
+  "email": "nva@gmail.com",
+  "phone": "0987654321"
+}
+```
+Trả về (Success: 200):
+```json
+{ "message": "Tạo người dùng thành công" }
+``` 
+
+Endpoint: ```PUT /user/:id```
+
+Mục đích: ADmin chỉnh sửa thông tin người dùng
+
+Nhận vào (Body JSON):
+```json
+{
+  "name": "Nguyễn Văn A (Đã sửa)",
+  "phone": "0111222333"
+}
+```
+Trả về (Success: 200):
+```json
+{ "message": "Cập nhật người dùng thành công" }
+``` 
+
+Endpoint: ```DELETE /user/:id```
+
+Mục đích: Xóa người dùng
+
+Trả về (Success: 200):
+```json
+{ "message": "Xóa người dùng thành công" }
+``` 
+
+
 ## Luồng xử lý tự động hóa (Auto Control Engine)
 File mqtt.js chạy ngầm như một Background Worker thực hiện các công việc:
 1. Lắng nghe dữ liệu đổ về từ các topic ```V1, V2, V3, V4.```
@@ -545,7 +667,7 @@ File mqtt.js chạy ngầm như một Background Worker thực hiện các công
 4. Cảnh báo: Nếu vượt ngưỡng, tạo dòng dữ liệu vào Notification.  
 5. Điều khiển tự động: Nếu độ ẩm đất thấp, tự động Publish giá trị 1 xuống Topic của ```Máy bơm (V14)``` để bật nước, đồng thời ghi nhận vào bảng ```ActivityLog```
 
-### Luồng hoạt động
+## Luồng hoạt động
 ```
 [Phần cứng IoT] ---> (MQTT Broker) ---> [Node.js Backend] ---> (SQL Server)
        ^                                      |                      |

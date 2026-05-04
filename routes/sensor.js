@@ -94,30 +94,7 @@ router.get("/area/:area_id/history/:type", verifyToken, async (req, res) => {
 });
 
 // =======================
-// POST Test Thêm dữ liệu cảm biến
-// =======================
-router.post("/data", verifyToken, async (req, res) => {
-    const { sensor_id, value } = req.body;
-    if (!sensor_id || value == null) {
-        return res.status(400).json({ error: "Thiếu sensor_id hoặc value" });
-    }
-
-    try {
-        await pool.request()
-            .input("sensor_id", sql.Int, sensor_id)
-            .input("value", sql.Float, value)
-            .query(`
-                INSERT INTO SensorData (sensor_id, value)
-                VALUES (@sensor_id, @value)
-            `);
-        res.json({ message: "Thêm dữ liệu thành công" });
-    } catch (err) {
-        res.status(500).json({ error: err.message });
-    }
-});
-
-// =======================
-// POST /sensor - Thêm cảm biến mới (Admin)
+// POST Thêm cảm biến mới (Admin)
 // =======================
 router.post("/", verifyToken, requireAdmin, async (req, res) => {
     const { name, type, area_id } = req.body;
@@ -187,4 +164,27 @@ router.delete("/:id", verifyToken, requireAdmin, async (req, res) => {
     }
 });
 
-export default router;
+// =======================
+// POST Thêm dữ liệu cảm biến
+// =======================
+router.post("/data", verifyToken, async (req, res) => {
+    const { sensor_id, value } = req.body;
+    if (!sensor_id || value == null) {
+        return res.status(400).json({ error: "Thiếu sensor_id hoặc value" });
+    }
+
+    try {
+        await pool.request()
+            .input("sensor_id", sql.Int, sensor_id)
+            .input("value", sql.Float, value)
+            .query(`
+                INSERT INTO SensorData (sensor_id, value)
+                VALUES (@sensor_id, @value)
+            `);
+        res.json({ message: "Thêm dữ liệu thành công" });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+export default router; 

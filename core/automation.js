@@ -88,7 +88,6 @@ export async function runAutomationForArea(area_id) {
     }
 }
 
-// Hàm hỗ trợ phát lệnh MQTT và lưu Log
 async function triggerDevice(device, mode, mqttTopic, reason, area_id) {
     const payload = mode === 'ON' ? "1" : "0";
     client.publish(mqttTopic, payload, { retain: true });

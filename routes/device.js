@@ -49,7 +49,7 @@ router.post("/override", verifyToken, async (req, res) => {
     const userId = req.user.id;
 
     try {
-        // ManualOverride (Composite Key: user_id, device_id)
+        // Composite Key: user_id, device_id
         await pool.request()
             .input("user_id", sql.Int, userId)
             .input("device_id", sql.Int, device_id)
@@ -65,7 +65,6 @@ router.post("/override", verifyToken, async (req, res) => {
                     VALUES (@user_id, @device_id, @mode, @expire_time)
             `);
 
-        // Ghi nhận ActivityLog
         await pool.request()
             .input("device_id", sql.Int, device_id)
             .input("mode", sql.NVarChar, mode)
@@ -75,7 +74,6 @@ router.post("/override", verifyToken, async (req, res) => {
                 VALUES (@device_id, @mode, @source)
             `);
         
-        // Truy vấn loại thiết bị để gửi đúng lệnh MQTT
         const devRes = await pool.request()
             .input("device_id", sql.Int, device_id)
             .query("SELECT type FROM Device WHERE id = @device_id");
@@ -97,6 +95,7 @@ router.post("/override", verifyToken, async (req, res) => {
         res.status(500).json({ error: "Lỗi server nội bộ" });
     }
 });
+
 // =======================
 // POST /device - Thêm thiết bị mới (Admin)
 // =======================

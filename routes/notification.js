@@ -8,7 +8,7 @@ const router = express.Router();
 // GET Danh sách thông báo
 // =======================
 router.get("/", verifyToken, async (req, res) => {
-    const userId = req.user.id; // Lấy thông báo của user đang đăng nhập
+    const userId = req.user.id;
     try {
         const result = await pool.request()
             .input("user_id", sql.Int, userId)

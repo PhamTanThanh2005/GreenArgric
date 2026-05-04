@@ -136,6 +136,14 @@
       }
     },
 
+    "/sensor/data": {
+      "post": {
+        "summary": "Thêm dữ liệu cảm biến",
+        "tags": ["Sensor"],
+        "responses": { "200": { "description": "Created" } }
+      }
+    },
+
     "/device": {
       "get": {
         "summary": "Lấy danh sách thiết bị",
@@ -176,10 +184,40 @@
       }
     },
 
+    "/activity": {
+      "get": {
+        "summary": "Lấy lịch sử hoạt động của các thiết bị",
+        "tags": ["Activity"],
+        "responses": { "200": { "description": "OK" } }
+      }
+    },
+
+    "/activity/{device_id}": {
+      "get": {
+        "summary": "Lấy lịch sử hoạt động theo 1 thiết bị cụ thể",
+        "tags": ["Activity"],
+        "parameters": [
+          { "name": "device_id", "in": "path", "required": true, "schema": { "type": "integer" } }
+        ],
+        "responses": { "200": { "description": "OK" } }
+      }
+    },
+
     "/threshold": {
       "post": {
         "summary": "Thiết lập ngưỡng",
         "tags": ["Threshold"],
+        "responses": { "200": { "description": "OK" } }
+      }
+    },
+
+    "/threshold/{area_id}": {
+      "get": {
+        "summary": "Lấy cấu hình ngưỡng của 1 khu vực",
+        "tags": ["Threshold"],
+        "parameters": [
+          { "name": "area_id", "in": "path", "required": true, "schema": { "type": "integer" } }
+        ],
         "responses": { "200": { "description": "OK" } }
       }
     },
@@ -192,11 +230,27 @@
       }
     },
 
+    "/notification/{id}/read": {
+      "post": {
+        "summary": "Đánh dấu thông báo đã đọc",
+        "tags": ["Notification"],
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "integer" } }
+        ],
+        "responses": { "200": { "description": "OK" } }
+      }
+    },
+
     "/user": {
       "get": {
         "summary": "Lấy danh sách user",
         "tags": ["User"],
         "responses": { "200": { "description": "OK" } }
+      },
+      "post": {
+        "summary": "Thêm người dùng mới (Admin)",
+        "tags": ["User"],
+        "responses": { "200": { "description": "Created" } }
       }
     },
 
@@ -205,6 +259,30 @@
         "summary": "Lấy thông tin user hiện tại",
         "tags": ["User"],
         "responses": { "200": { "description": "OK" } }
+      },
+      "put": {
+        "summary": "Cập nhật thông tin cá nhân",
+        "tags": ["User"],
+        "responses": { "200": { "description": "Updated" } }
+      }
+    },
+
+    "/user/{id}": {
+      "put": {
+        "summary": "Chỉnh sửa thông tin người dùng (Admin)",
+        "tags": ["User"],
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "integer" } }
+        ],
+        "responses": { "200": { "description": "Updated" } }
+      },
+      "delete": {
+        "summary": "Xóa người dùng (Admin)",
+        "tags": ["User"],
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "integer" } }
+        ],
+        "responses": { "200": { "description": "Deleted" } }
       }
     }
 
