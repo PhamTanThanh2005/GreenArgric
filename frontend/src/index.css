@@ -1,0 +1,19 @@
+@import "tailwindcss";
+
+@theme {
+  --color-brand-green: #115D33;
+  --color-brand-red: #9C050C;
+  --color-second-green: #9FD086;
+  --font-sans: "Montserrat", sans-serif;
+  --font-unbounded: "Unbounded", sans-serif;
+  --font-playwrite: "Playwrite US Trad", cursive;
+}
+
+@layer utilities {
+  .font-unbounded {
+    font-family: var(--font-unbounded);
+  }
+    .font-playwrite {
+    font-family: var(--font-playwrite);
+  }
+}
