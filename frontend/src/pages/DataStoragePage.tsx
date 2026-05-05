@@ -176,8 +176,8 @@ export const DataStoragePage: React.FC = () => {
   const handleDownload = (filename: string) => alert(`Chức năng xuất File CSV cho ${filename} sẽ cập nhật sau!`);
 
   const getDeviceColors = (type: string) => {
-    if (type === 'light') return ["#0ea5e9", "#3b82f6", "#e0f2fe"];
-    return ["#16a34a", "#86efac", "#fee2e2"];
+    if (type === 'light') return ["#9C050C", "#003366", "#669BBC"];
+    return ["#115D33", "#2E8B57", "#90EE90"];
   };
 
   return (
@@ -212,10 +212,10 @@ export const DataStoragePage: React.FC = () => {
 
       {activeTab === 'environment' && (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 animate-in fade-in duration-500">
-          <ChartBox title="Nhiệt độ" data={envData.temp} color="#16a34a" isLoading={isEnvLoading} onDownload={() => handleDownload('Nhiet_do')} />
-          <ChartBox title="Độ ẩm đất" data={envData.soil_moisture} color="#dc2626" isLoading={isEnvLoading} onDownload={() => handleDownload('Do_am_dat')} />
-          <ChartBox title="Độ ẩm" data={envData.moisture} color="#dc2626" isLoading={isEnvLoading} onDownload={() => handleDownload('Do_am')} />
-          <ChartBox title="Ánh sáng" data={envData.light} color="#2563eb" isLoading={isEnvLoading} onDownload={() => handleDownload('Anh_sang')} />
+          <ChartBox title="Nhiệt độ" data={envData.temp} color="#115D33" isLoading={isEnvLoading} onDownload={() => handleDownload('Nhiet_do')} />
+          <ChartBox title="Độ ẩm đất" data={envData.soil_moisture} color="#9C050C" isLoading={isEnvLoading} onDownload={() => handleDownload('Do_am_dat')} />
+          <ChartBox title="Độ ẩm" data={envData.moisture} color="#9C050C" isLoading={isEnvLoading} onDownload={() => handleDownload('Do_am')} />
+          <ChartBox title="Ánh sáng" data={envData.light} color="#050C9C" isLoading={isEnvLoading} onDownload={() => handleDownload('Anh_sang')} />
         </div>
       )}
 
@@ -231,7 +231,7 @@ export const DataStoragePage: React.FC = () => {
               </button>
               <button
                 onClick={() => setDeviceViewMode('duration')}
-                className={cn("flex items-center gap-2 px-6 py-2.5 rounded-lg font-bold transition-all", deviceViewMode === 'duration' ? "bg-white text-orange-500 shadow-sm" : "text-gray-500 hover:text-gray-700")}
+                className={cn("flex items-center gap-2 px-6 py-2.5 rounded-lg font-bold transition-all", deviceViewMode === 'duration' ? "bg-white text-brand-red shadow-sm" : "text-gray-500 hover:text-gray-700")}
               >
                 <Clock size={18} /> Tổng thời gian (Giờ)
               </button>
@@ -254,7 +254,7 @@ export const DataStoragePage: React.FC = () => {
                       {deviceViewMode === 'frequency' ? (
                         <DeviceHistoryChart data={device.data} colors={getDeviceColors(device.type)} />
                       ) : (
-                        <DeviceDurationChart data={device.data} color={device.type === 'light' ? '#3b82f6' : '#f59e0b'} />
+                        <DeviceDurationChart data={device.data} color={device.type === 'light' ? '#9C050C' : '#115D33'} />
                       )}
                     </div>
                   </div>
@@ -271,8 +271,8 @@ export const DataStoragePage: React.FC = () => {
 const ChartBox = ({ title, data, color, isLoading, onDownload }: { title: string, data: EnvDataPoint[], color: string, isLoading: boolean, onDownload: () => void }) => (
   <div className="bg-[#e8efe9] rounded-3xl p-6 relative flex flex-col h-72 border border-brand-green/10">
     <div className="flex justify-between items-center mb-4">
-      <h3 className="text-2xl font-bold text-[#b91c1c]">{title}</h3>
-      <button onClick={onDownload} className="bg-[#1a5b32] p-2 rounded-full text-white hover:bg-green-800 transition"><Download size={18} strokeWidth={2.5} /></button>
+      <h3 className="text-2xl font-bold text-brand-red">{title}</h3>
+      <button onClick={onDownload} className="bg-brand-green p-2 rounded-full text-white hover:bg-green-800 transition"><Download size={18} strokeWidth={2.5} /></button>
     </div>
     <div className="flex-1 w-full relative">
       {isLoading ? (

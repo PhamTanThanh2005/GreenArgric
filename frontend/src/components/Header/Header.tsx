@@ -3,7 +3,7 @@ import axios from 'axios';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Bell, UserCircle, LogOut, CheckCircle } from 'lucide-react';
 import { SearchField } from '../SearchField/SearchField';
-import { notificationApi, type AppNotification } from '../../features/notification/notificationApi'; // Thay đường dẫn cho đúng
+import { notificationApi, type AppNotification } from '../../features/notification/notificationApi';
 import { cn } from '../../utils';
 
 export const Header: React.FC = () => {

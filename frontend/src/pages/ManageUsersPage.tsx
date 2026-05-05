@@ -146,7 +146,6 @@ export const ManageUsersPage: React.FC = () => {
       <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-4">
         <div>
           <h2 className="text-3xl font-bold text-brand-green uppercase">Quản lý Người dùng</h2>
-          <p className="text-gray-500 mt-1">Quản lý tài khoản, phân quyền và liên hệ trong hệ thống</p>
         </div>
         
         <div className="flex gap-3">

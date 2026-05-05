@@ -56,7 +56,7 @@ export const ZoneDashboardPage: React.FC = () => {
         sensorApi.getLatestByArea(zoneId),
         fetchDevices(),
         activityApi.getAll(),
-        sensorApi.getHistoryByAreaAndType(zoneId, 'temp').catch(() => []) // Catch lỗi nếu chưa có lịch sử
+        sensorApi.getHistoryByAreaAndType(zoneId, 'temp').catch(() => [])
       ]);
 
       const currentArea = areas.find(a => a.id.toString() === zoneId);

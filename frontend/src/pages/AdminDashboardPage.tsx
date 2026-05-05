@@ -108,10 +108,10 @@ export const AdminDashboardPage: React.FC = () => {
 
         <div className="flex items-center gap-3">
           <button onClick={() => navigate('/admin/users')} className="flex items-center gap-2 bg-white px-4 py-2.5 rounded-xl shadow-sm text-gray-700 hover:bg-gray-50 border border-gray-200 transition-all font-semibold cursor-pointer">
-            <UserPlus size={18} className="text-blue-600" /> Quản lý User
+            <UserPlus size={18} className="text-brand-green" /> Quản lý User
           </button>
-          <button onClick={() => navigate('/admin/thresholds')} className="flex items-center gap-2 bg-white px-4 py-2.5 rounded-xl shadow-sm text-gray-700 hover:bg-gray-50 border border-gray-200 transition-all font-semibold cursor-pointer">
-            <Sliders size={18} className="text-orange-500" /> Cài đặt ngưỡng
+          <button onClick={() => navigate('/admin/devices')} className="flex items-center gap-2 bg-white px-4 py-2.5 rounded-xl shadow-sm text-gray-700 hover:bg-gray-50 border border-gray-200 transition-all font-semibold cursor-pointer">
+            <Sliders size={18} className="text-brand-red" /> Cài đặt ngưỡng
           </button>
           <button onClick={loadAdminData} className="flex items-center gap-2 bg-brand-green px-4 py-2.5 rounded-xl shadow-sm text-white hover:bg-green-700 transition-all font-bold cursor-pointer">
             <RefreshCw size={18} /> Làm mới
@@ -153,10 +153,10 @@ export const AdminDashboardPage: React.FC = () => {
 
             <div className="grid grid-cols-2 gap-4">
               <div className="p-4 rounded-2xl bg-green-50 border border-green-100 flex items-center gap-4">
-                <div className="p-3 bg-green-100 text-green-600 rounded-xl"><CheckCircle2 size={24} /></div>
+                <div className="p-3 bg-green-100 text-brand-green rounded-xl"><CheckCircle2 size={24} /></div>
                 <div>
                   <p className="text-sm text-gray-500 font-semibold">Đang BẬT</p>
-                  <p className="text-2xl font-bold text-green-700">{deviceHealth.on}</p>
+                  <p className="text-2xl font-bold text-brand-green">{deviceHealth.on}</p>
                 </div>
               </div>
               <div className="p-4 rounded-2xl bg-gray-50 border border-gray-200 flex items-center gap-4">
@@ -172,20 +172,20 @@ export const AdminDashboardPage: React.FC = () => {
           <div className="bg-white p-6 rounded-3xl shadow-sm border border-gray-100">
             <div className="flex justify-between items-center mb-4">
               <h3 className="text-lg font-bold text-gray-800 flex items-center gap-2">
-                <Users className="text-blue-500" /> Cơ cấu Người dùng
+                <Users className="text-blue-800" /> Cơ cấu Người dùng
               </h3>
-              <button onClick={() => navigate('/admin/users')} className="text-sm font-bold text-blue-600 hover:underline cursor-pointer">
+              <button onClick={() => navigate('/admin/users')} className="text-sm font-bold text-blue-800 hover:underline cursor-pointer">
                 Quản lý chi tiết
               </button>
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div className="flex justify-between items-center p-4 border border-gray-100 rounded-xl">
                 <span className="font-semibold text-gray-600">Quản trị viên (Admin)</span>
-                <span className="bg-blue-100 text-blue-700 px-3 py-1 rounded-full font-bold">{stats.adminCount}</span>
+                <span className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full font-bold">{stats.adminCount}</span>
               </div>
               <div className="flex justify-between items-center p-4 border border-gray-100 rounded-xl">
                 <span className="font-semibold text-gray-600">Chủ vườn (Owner)</span>
-                <span className="bg-green-100 text-green-700 px-3 py-1 rounded-full font-bold">{stats.ownerCount}</span>
+                <span className="bg-green-100 text-brand-green px-3 py-1 rounded-full font-bold">{stats.ownerCount}</span>
               </div>
             </div>
           </div>

@@ -66,7 +66,6 @@ export const ControlDevicePage: React.FC = () => {
       <div className="flex justify-between items-end">
         <div>
           <h2 className="text-3xl font-bold text-brand-green uppercase">Điều khiển thiết bị</h2>
-          <p className="text-gray-500 font-medium">Quản lý trạng thái vận hành của toàn bộ hệ thống thiết bị</p>
         </div>
         <button onClick={loadData} className="text-brand-green hover:text-green-700 bg-green-50 p-2 rounded-full">
           <RefreshCw className={cn("w-6 h-6", loading && "animate-spin")} />

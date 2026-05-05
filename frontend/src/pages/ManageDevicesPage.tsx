@@ -20,10 +20,10 @@ interface DeviceData {
 }
 
 const SENSOR_TYPES = [
-  { id: 'temp', label: 'Nhiệt độ', icon: <Thermometer className="text-red-500" />, unit: '°C' },
-  { id: 'light', label: 'Ánh sáng', icon: <Sun className="text-orange-500" />, unit: 'Lux' },
-  { id: 'moisture', label: 'Độ ẩm KK', icon: <Droplets className="text-blue-500" />, unit: '%' },
-  { id: 'soil_moisture', label: 'Độ ẩm đất', icon: <Sprout className="text-emerald-500" />, unit: '%' },
+  { id: 'temp', label: 'Nhiệt độ', icon: <Thermometer className="text-brand-red" />, unit: '°C' },
+  { id: 'light', label: 'Ánh sáng', icon: <Sun className="text-brand-red" />, unit: 'Lux' },
+  { id: 'moisture', label: 'Độ ẩm KK', icon: <Droplets className="text-blue-800" />, unit: '%' },
+  { id: 'soil_moisture', label: 'Độ ẩm đất', icon: <Sprout className="text-brand-green" />, unit: '%' },
 ];
 
 export const ManageDevicesPage: React.FC = () => {
@@ -221,10 +221,10 @@ export const ManageDevicesPage: React.FC = () => {
 
   const getDeviceIcon = (type: string) => {
     switch (type) {
-      case 'pump': return <Droplets className="text-blue-500" />;
-      case 'light': return <Sun className="text-orange-500" />;
-      case 'fan': return <Wind className="text-teal-500" />;
-      case 'sensor': return <Thermometer className="text-purple-500" />;
+      case 'pump': return <Droplets className="text-blue-800" />;
+      case 'light': return <Sun className="text-brand-red" />;
+      case 'fan': return <Wind className="text-brand-green" />;
+      case 'sensor': return <Thermometer className="text-purple-800" />;
       default: return <Cpu className="text-gray-500" />;
     }
   };
@@ -314,7 +314,7 @@ export const ManageDevicesPage: React.FC = () => {
                 <div className="flex gap-3">
                   <button 
                     onClick={handleOpenThresholdModal}
-                    className="flex items-center gap-2 bg-amber-50 text-amber-600 border border-amber-200 px-4 py-2.5 rounded-xl font-bold hover:bg-amber-100 transition-colors shadow-sm cursor-pointer"
+                    className="flex items-center gap-2 bg-red-50 text-brand-red border border-red-200 px-4 py-2.5 rounded-xl font-bold hover:bg-red-100 transition-colors shadow-sm cursor-pointer"
                   >
                     <Settings size={18} /> Ngưỡng
                   </button>
@@ -347,7 +347,7 @@ export const ManageDevicesPage: React.FC = () => {
                             <div className="flex items-center gap-2 mt-1">
                               <span className="text-xs font-semibold text-gray-500 uppercase">{device.type}</span>
                               <span className="text-gray-300">•</span>
-                              <span className={cn("text-[10px] px-2 py-0.5 rounded-full font-bold uppercase", device.status ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700")}>
+                              <span className={cn("text-[10px] px-2 py-0.5 rounded-full font-bold uppercase", device.status ? "bg-green-100 text-brand-green" : "bg-red-100 text-red-700")}>
                                 {device.status ? 'Hoạt động' : 'Bảo trì'}
                               </span>
                             </div>
