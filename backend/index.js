@@ -17,7 +17,7 @@ import "./mqtt.js";
 const app = express();
 
 app.use(cors({
-    origin: 'http://localhost:5174', // Cho phép Frontend
+    origin: 'http://localhost:5173', // Cho phép Frontend
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
     credentials: true
 }));
