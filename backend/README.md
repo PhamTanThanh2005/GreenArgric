@@ -680,13 +680,14 @@ Trả về (Success: 200):
 
 Endpoint: ```PUT /user/:id```
 
-Mục đích: ADmin chỉnh sửa thông tin người dùng
+Mục đích: Admin chỉnh sửa thông tin người dùng
 
 Nhận vào (Body JSON):
 ```json
 {
   "name": "Nguyễn Văn A (Đã sửa)",
-  "phone": "0111222333"
+  "phone": "0111222333",
+  "role": "owner" // bắt buộc
 }
 ```
 Trả về (Success: 200):
@@ -730,7 +731,8 @@ Nhận vào (Body JSON):
 {
   "title": "Bón phân định kỳ",           // (Bắt buộc)
   "description": "Bón phân hữu cơ",       // (Tùy chọn)
-  "scheduled_at": "2026-05-15T15:00:00Z", // (Tùy chọn)
+  "scheduled_at": "2026-05-15T15:00:00Z", // (Bắt buộc)
+  "area_id": 1,                           // (Bắt buộc)
   "status": "pending",                    // (Tùy chọn, mặc định: "pending")
   "is_done": false                        // (Tùy chọn, mặc định: false)
 }
