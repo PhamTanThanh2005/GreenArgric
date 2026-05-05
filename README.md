@@ -15,6 +15,17 @@ Green Argric là hệ thống quản trị và giám sát nông nghiệp thông 
   </p>
 </div>
 
+## 🛠 Built With
+
+- [![React][React.js]][React-url]
+- [![TypeScript][TypeScript]][TypeScript-url]
+- [![Vite][Vite]][Vite-url]
+- [![TailwindCSS][TailwindCSS]][TailwindCSS-url]
+- [![Node.js][Node.js]][Node-url]
+- [![Express.js][Express.js]][Express-url]
+- [![SQL Server][SQLServer]][SQLServer-url]
+- [![MQTT][MQTT]][MQTT-url]
+
 ## 🚀 Công nghệ sử dụng (Tech Stack)
 ### Frontend
 * Core: React 18, TypeScript, Vite.
@@ -77,3 +88,21 @@ npm install
 npm run dev
 ```
 Giao diện chạy tại: `http://localhost:5173`
+
+
+[React.js]: https://img.shields.io/badge/react-%2320232a.svg?style=for-the-badge&logo=react&logoColor=%2361DAFB
+[React-url]: https://reactjs.org/
+[TypeScript]: https://img.shields.io/badge/typescript-%23007ACC.svg?style=for-the-badge&logo=typescript&logoColor=white
+[TypeScript-url]: https://www.typescriptlang.org/
+[Vite]: https://img.shields.io/badge/vite-%23646CFF.svg?style=for-the-badge&logo=vite&logoColor=white
+[Vite-url]: https://vitejs.dev/
+[TailwindCSS]: https://img.shields.io/badge/tailwindcss-%2338B2AC.svg?style=for-the-badge&logo=tailwind-css&logoColor=white
+[TailwindCSS-url]: https://tailwindcss.com/
+[Node.js]: https://img.shields.io/badge/node.js-6DA55F?style=for-the-badge&logo=node.js&logoColor=white
+[Node-url]: https://nodejs.org/
+[Express.js]: https://img.shields.io/badge/express.js-%23404d59.svg?style=for-the-badge&logo=express&logoColor=%2361DAFB
+[Express-url]: https://expressjs.com/
+[SQLServer]: https://img.shields.io/badge/Microsoft%20SQL%20Server-CC292B?style=for-the-badge&logo=microsoft%20sql%20server&logoColor=white
+[SQLServer-url]: https://www.microsoft.com/en-us/sql-server
+[MQTT]: https://img.shields.io/badge/MQTT-660066?style=for-the-badge&logo=mqtt&logoColor=white
+[MQTT-url]: https://mqtt.org/
