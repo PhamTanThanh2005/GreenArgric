@@ -284,7 +284,184 @@
         ],
         "responses": { "200": { "description": "Deleted" } }
       }
-    }
+    },
 
+    "/task": {
+      "get": {
+        "summary": "Lấy danh sách các công việc cần làm",
+        "tags": [
+          "Task"
+        ],
+        "responses": {
+          "200": {
+            "description": "Thành công"
+          }
+        }
+      },
+      "post": {
+        "summary": "Thêm một công việc mới",
+        "tags": [
+          "Task"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "title": {
+                    "type": "string",
+                    "example": "Bón phân định kỳ"
+                  },
+                  "description": {
+                    "type": "string",
+                    "example": "Bón phân hữu cơ"
+                  },
+                  "scheduled_at": {
+                    "type": "string",
+                    "format": "date-time",
+                    "example": "2026-05-15T15:00:00Z"
+                  },
+                  "status": {
+                    "type": "string",
+                    "default": "pending"
+                  },
+                  "is_done": {
+                    "type": "boolean",
+                    "default": false
+                  }
+                },
+                "required": [
+                  "title"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Tạo công việc thành công"
+          }
+        }
+      }
+    },
+    "/task/{id}": {
+      "put": {
+        "summary": "Cập nhật công việc",
+        "tags": [
+          "Task"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "title": {
+                    "type": "string",
+                    "example": "Kiểm tra nồng độ dinh dưỡng"
+                  },
+                  "scheduled_at": {
+                    "type": "string",
+                    "format": "date-time",
+                    "example": "2026-04-28T15:22:58.693Z"
+                  },
+                  "status": {
+                    "type": "string",
+                    "example": "PENDING"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Cập nhật công việc thành công"
+          }
+        }
+      },
+      "delete": {
+        "summary": "Xóa công việc",
+        "tags": [
+          "Task"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Xóa công việc thành công"
+          },
+          "404": {
+            "description": "Không tìm thấy công việc hoặc bạn không có quyền xóa"
+          },
+          "500": {
+            "description": "Lỗi server nội bộ"
+          }
+        }
+      }
+    },
+    "/task/{id}/status": {
+      "patch": {
+        "summary": "Cập nhật trạng thái công việc",
+        "tags": [
+          "Task"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "status": {
+                    "type": "string",
+                    "example": "COMPLETED"
+                  }
+                },
+                "required": [
+                  "status"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Cập nhật trạng thái thành công"
+          }
+        }
+      }
+    }
   }
 }

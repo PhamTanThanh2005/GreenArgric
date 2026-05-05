@@ -703,6 +703,97 @@ Trả về (Success: 200):
 { "message": "Xóa người dùng thành công" }
 ``` 
 
+### Quản lý Công việc (Task Management)
+
+Endpoint: ```GET /task```
+
+Trả về (Success: 200): Lấy danh sách các công việc cần làm
+```json
+[
+    {
+      "id": 1,
+      "title": "Tưới nước khu A",
+      "description": "Kiểm tra và tưới nước cho toàn bộ dưa lưới",
+      "scheduled_at": "2026-05-10T08:00:00.000Z",
+      "status": "pending",
+      "is_done": false
+    }
+  ]
+``` 
+
+Endpoint: ```POST /task```
+
+Mô tả: Thêm một công việc mới
+
+Nhận vào (Body JSON):
+```json
+{
+  "title": "Bón phân định kỳ",           // (Bắt buộc)
+  "description": "Bón phân hữu cơ",       // (Tùy chọn)
+  "scheduled_at": "2026-05-15T15:00:00Z", // (Tùy chọn)
+  "status": "pending",                    // (Tùy chọn, mặc định: "pending")
+  "is_done": false                        // (Tùy chọn, mặc định: false)
+}
+```
+Trả về (Success: 200):
+```json
+{
+  "message": "Tạo công việc thành công",
+  "taskId": 6
+}
+``` 
+
+Endpoint: ```PUT /task/:id```
+
+Mô tả: Cập nhật công việc
+
+Nhận vào (Body JSON):
+```json
+{
+    "title": "Kiểm tra nồng độ dinh dưỡng",
+    "scheduled_at": "2026-04-28T15:22:58.693Z",
+    "status": "PENDING"
+}
+```
+Trả về (Success: 200):
+```json
+{
+    "message": "Cập nhật công việc thành công"
+}
+``` 
+
+Endpoint: ```PATCH /task/:id/status```
+
+Mô tả: Cập nhật trạng thái công việc
+
+Nhận vào (Body JSON):
+```json
+{
+  "status": "COMPLETED" 
+}
+```
+Trả về (Success: 200):
+```json
+{
+  "message": "Cập nhật trạng thái thành công",
+  "data": {
+    "status": "COMPLETED",
+    "is_done": true
+  }
+}
+``` 
+
+Endpoint: ```DELETE /task/:id```
+
+Mô tả: Xóa công việc công việc
+
+Trả về (Success: 200):
+```json
+{
+  "message": "Xóa công việc thành công"
+} 
+```
+
 
 ## Luồng xử lý tự động hóa (Auto Control Engine)
 

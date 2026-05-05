@@ -1,4 +1,4 @@
--- 1. Bảng User (Thực thể trung tâm)
+-- 1. Bảng User
 CREATE TABLE [User] (
     id INT IDENTITY(1,1) PRIMARY KEY,
     username NVARCHAR(50) NOT NULL UNIQUE,
@@ -11,7 +11,7 @@ CREATE TABLE [User] (
     CONSTRAINT chk_user_role CHECK (role IN ('admin', 'owner', 'staff'))
 );
 
--- 2. Bảng Area (Khu vực nhà kính)
+-- 2. Bảng Area
 CREATE TABLE Area (
     id INT IDENTITY(1,1) PRIMARY KEY,
     name NVARCHAR(100) NOT NULL,
@@ -30,30 +30,32 @@ CREATE TABLE User_Area (
     CONSTRAINT chk_access_level CHECK (access_level IN ('OWNER', 'EDITOR', 'VIEWER'))
 );
 
--- 4. Bảng Device (Thiết bị đầu ra thuộc về Khu vực)
+-- 4. Bảng Device
 CREATE TABLE Device (
     id INT IDENTITY(1,1) PRIMARY KEY,
     name NVARCHAR(100) NOT NULL,
     type NVARCHAR(20) NOT NULL,
     status BIT DEFAULT 1, -- 1: Active, 0: Inactive
     area_id INT NOT NULL,
+    feed_key NVARCHAR(20),
     
     FOREIGN KEY (area_id) REFERENCES Area(id) ON DELETE CASCADE,
     CONSTRAINT chk_device_type CHECK (type IN ('pump', 'light'))
 );
 
--- 5. Bảng Sensor (Thiết bị đầu vào thuộc về Khu vực)
+-- 5. Bảng Sensor
 CREATE TABLE Sensor (
     id INT IDENTITY(1,1) PRIMARY KEY,
     name NVARCHAR(100) NOT NULL,
     type NVARCHAR(20) NOT NULL,
     area_id INT NOT NULL,
+    feed_key NVARCHAR(20),
     
     FOREIGN KEY (area_id) REFERENCES Area(id) ON DELETE CASCADE,
     CONSTRAINT chk_sensor_type CHECK (type IN ('temp', 'light', 'moisture', 'soil_moisture'))
 );
 
--- 6. Bảng ThresholdConfig (Cấu hình ngưỡng cho Khu vực)
+-- 6. Bảng ThresholdConfig
 CREATE TABLE ThresholdConfig (
     id INT IDENTITY(1,1) PRIMARY KEY,
     area_id INT NOT NULL,
@@ -66,7 +68,7 @@ CREATE TABLE ThresholdConfig (
     CONSTRAINT uq_area_sensor_threshold UNIQUE (area_id, sensor_type) -- Đảm bảo 1 khu vực chỉ có 1 khoảng ngưỡng/loại cảm biến
 );
 
--- 7. Bảng SensorData (Thực thể yếu lưu dữ liệu đo đạc)
+-- 7. Bảng SensorData
 CREATE TABLE SensorData (
     id INT IDENTITY(1,1) PRIMARY KEY,
     sensor_id INT NOT NULL,
@@ -76,7 +78,7 @@ CREATE TABLE SensorData (
     FOREIGN KEY (sensor_id) REFERENCES Sensor(id) ON DELETE CASCADE
 );
 
--- 8. Bảng ActivityLog (Thực thể yếu lưu lịch sử thiết bị)
+-- 8. Bảng ActivityLog
 CREATE TABLE ActivityLog (
     id INT IDENTITY(1,1) PRIMARY KEY,
     device_id INT NOT NULL,
@@ -89,7 +91,7 @@ CREATE TABLE ActivityLog (
     CONSTRAINT chk_activity_source CHECK (source IN ('auto', 'manual'))
 );
 
--- 9. Bảng ManualOverride (Thực thể kết hợp giữa User và Device)
+-- 9. Bảng ManualOverride
 CREATE TABLE ManualOverride (
     user_id INT NOT NULL,
     device_id INT NOT NULL,
@@ -103,7 +105,7 @@ CREATE TABLE ManualOverride (
     CONSTRAINT chk_override_mode CHECK (mode IN ('ON', 'OFF'))
 );
 
--- 10. Bảng Task (Công việc/Nhắc nhở tại Khu vực)
+-- 10. Bảng Task
 CREATE TABLE Task (
     id INT IDENTITY(1,1) PRIMARY KEY,
     title NVARCHAR(100) NOT NULL,
@@ -119,7 +121,7 @@ CREATE TABLE Task (
     CONSTRAINT chk_task_status CHECK (status IN ('PENDING', 'IN_PROGRESS', 'COMPLETED'))
 );
 
--- 11. Bảng Notification (Cảnh báo hệ thống 1:N)
+-- 11. Bảng Notification
 CREATE TABLE Notification (
     id INT IDENTITY(1,1) PRIMARY KEY,
     user_id INT NOT NULL,
