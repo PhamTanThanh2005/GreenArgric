@@ -9,5 +9,5 @@ const FEED_BASE = process.env.MQTT_FEED || "MinhTriDADN/feeds";
 //     LUX: `${FEED_BASE}/V4`,  // Ánh sáng
 // };
 
-// export const CONTROL_PUMP = `${FEED_BASE}/V10`; // Máy bơm
-// export const CONTROL_LIGHT = `${FEED_BASE}/V11`; // Đèn
+export const CONTROL_PUMP = `${FEED_BASE}/V10`; // Máy bơm
+export const CONTROL_LIGHT = `${FEED_BASE}/V11`; // Đèn

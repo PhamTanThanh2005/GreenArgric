@@ -2,6 +2,7 @@ import sql from "mssql";
 import pool from "../db.js";
 import { client } from "../mqtt.js";
 import { logActivity, notifyAreaOwners } from "./utils.js";
+import { CONTROL_PUMP, CONTROL_LIGHT } from "./const.js";
 
 export async function runAutomationForArea(area_id) {
     console.log(`\x1b[36m[AUTO]\x1b[0m Đang kiểm tra tự động cho Khu vực ID: ${area_id}`);
@@ -37,9 +38,13 @@ export async function runAutomationForArea(area_id) {
 
         for (const device of devicesRes.recordset) {
             // Check manual override (Ưu tiên quyền thủ công)
+
+            const currentTime = new Date();
+            
             const override = await pool.request()
                 .input("device_id", sql.Int, device.id)
-                .query(`SELECT TOP 1 device_id FROM ManualOverride WHERE device_id = @device_id AND expire_time > GETDATE()`);
+                .input("now", sql.DateTime, currentTime) // Truyền thời gian vào
+                .query(`SELECT TOP 1 device_id FROM ManualOverride WHERE device_id = @device_id AND expire_time > @now`);
             
             if (override.recordset.length > 0) {
                 console.log(`[AUTO] Thiết bị ${device.type} (ID: ${device.id}) đang bị ghi đè thủ công -> Bỏ qua tự động.`);

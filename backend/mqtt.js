@@ -17,8 +17,8 @@ const lastSavedValues = {};
 
 const DELTA_THRESHOLDS = {
     'temp': 0.5,           // Nhiệt độ: Chênh 0.5°C
-    'soil_moisture': 2.0,  // Độ ẩm đất: Chênh 2%
-    'moisture': 2.0,       // Độ ẩm KK: Chênh 2%
+    'soil_moisture': 1.0,  // Độ ẩm đất: Chênh 1%
+    'moisture': 1.0,       // Độ ẩm KK: Chênh 1%
     'light': 1.0         // Ánh sáng: Chênh 1%
 };
 
