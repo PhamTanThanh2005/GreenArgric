@@ -58,6 +58,21 @@
       "post": {
         "summary": "Thêm khu vực",
         "tags": ["Area"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": { "type": "string" },
+                  "description": { "type": "string" },
+                  "owner_id": { "type": "integer" }
+                }
+              }
+            }
+          }
+        },
         "responses": { "200": { "description": "Created" } }
       }
     },
@@ -67,9 +82,30 @@
         "summary": "Cập nhật khu vực",
         "tags": ["Area"],
         "parameters": [
-          { "name": "id", "in": "path", "required": true, "schema": { "type": "integer" } }
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "integer" }
+          }
         ],
-        "responses": { "200": { "description": "Updated" } }
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": { "type": "string" },
+                  "description": { "type": "string" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Updated" }
+        }
       },
       "delete": {
         "summary": "Xóa khu vực",
@@ -90,6 +126,21 @@
       "post": {
         "summary": "Thêm cảm biến",
         "tags": ["Sensor"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": { "type": "string" },
+                  "type": { "type": "string" },
+                  "area_id": { "type": "integer" }
+                }
+              }
+            }
+          }
+        },
         "responses": { "200": { "description": "Created" } }
       }
     },
@@ -101,6 +152,21 @@
         "parameters": [
           { "name": "id", "in": "path", "required": true, "schema": { "type": "integer" } }
         ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": { "type": "string" },
+                  "type": { "type": "string" },
+                  "area_id": { "type": "integer" }
+                }
+              }
+            }
+          }
+        },
         "responses": { "200": { "description": "Updated" } }
       },
       "delete": {
@@ -140,6 +206,20 @@
       "post": {
         "summary": "Thêm dữ liệu cảm biến",
         "tags": ["Sensor"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "sensor_id": { "type": "integer" },
+                  "value": { "type": "number" }
+                }
+              }
+            }
+          }
+        },
         "responses": { "200": { "description": "Created" } }
       }
     },
@@ -153,6 +233,22 @@
       "post": {
         "summary": "Thêm thiết bị",
         "tags": ["Device"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": { "type": "string" },
+                  "type": { "type": "string" },
+                  "area_id": { "type": "integer" },
+                  "status": { "type": "integer" }
+                }
+              }
+            }
+          }
+        },
         "responses": { "200": { "description": "Created" } }
       }
     },
@@ -164,6 +260,22 @@
         "parameters": [
           { "name": "id", "in": "path", "required": true, "schema": { "type": "integer" } }
         ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": { "type": "string" },
+                  "type": { "type": "string" },
+                  "status": { "type": "integer" },
+                  "area_id": { "type": "integer" }
+                }
+              }
+            }
+          }
+        },
         "responses": { "200": { "description": "Updated" } }
       },
       "delete": {
@@ -180,6 +292,24 @@
       "post": {
         "summary": "Điều khiển thiết bị thủ công",
         "tags": ["Device"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "device_id": { "type": "integer" },
+                  "mode": { "type": "string", "enum": ["ON", "OFF"] },
+                  "expire_time": {
+                    "type": "string",
+                    "format": "date-time"
+                  }
+                }
+              }
+            }
+          }
+        },
         "responses": { "200": { "description": "OK" } }
       }
     },
@@ -207,6 +337,22 @@
       "post": {
         "summary": "Thiết lập ngưỡng",
         "tags": ["Threshold"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "area_id": { "type": "integer" },
+                  "sensor_type": { "type": "string" },
+                  "min_value": { "type": "number" },
+                  "max_value": { "type": "number" }
+                }
+              }
+            }
+          }
+        },
         "responses": { "200": { "description": "OK" } }
       }
     },
@@ -250,6 +396,24 @@
       "post": {
         "summary": "Thêm người dùng mới (Admin)",
         "tags": ["User"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "username": { "type": "string" },
+                  "password": { "type": "string" },
+                  "name": { "type": "string" },
+                  "role": { "type": "string", "enum": ["admin", "owner", "staff"] },
+                  "email": { "type": "string" },
+                  "phone": { "type": "string" }
+                }
+              }
+            }
+          }
+        },
         "responses": { "200": { "description": "Created" } }
       }
     },
@@ -263,6 +427,35 @@
       "put": {
         "summary": "Cập nhật thông tin cá nhân",
         "tags": ["User"],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "username": {
+                    "type": "string",
+                    "example": "nguyenvana"
+                  },
+                  "name": {
+                    "type": "string",
+                    "example": "Nguyễn Văn A"
+                  },
+                  "email": {
+                    "type": "string",
+                    "format": "email",
+                    "example": "example@gmail.com"
+                  },
+                  "phone": {
+                    "type": "string",
+                    "example": "0988123456"
+                  }
+                },
+                "additionalProperties": false
+              }
+            }
+          }
+        },
         "responses": { "200": { "description": "Updated" } }
       }
     },
@@ -274,6 +467,41 @@
         "parameters": [
           { "name": "id", "in": "path", "required": true, "schema": { "type": "integer" } }
         ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "minProperties": 1,
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "example": "Nguyễn Văn A"
+                  },
+                  "email": {
+                    "type": "string",
+                    "format": "email",
+                    "example": "example@gmail.com"
+                  },
+                  "phone": {
+                    "type": "string",
+                    "example": "0988123456"
+                  },
+                  "role": {
+                    "type": "string",
+                    "enum": ["admin", "owner", "staff"],
+                    "example": "owner"
+                  },
+                  "password": {
+                    "type": "string",
+                    "example": "newpassword123"
+                  }
+                },
+                "additionalProperties": false
+              }
+            }
+          }
+        },
         "responses": { "200": { "description": "Updated" } }
       },
       "delete": {
@@ -323,6 +551,10 @@
                     "format": "date-time",
                     "example": "2026-05-15T15:00:00Z"
                   },
+                  "area_id": {
+                    "type": "integer",
+                    "example": 1
+                  },
                   "status": {
                     "type": "string",
                     "default": "pending"
@@ -346,6 +578,7 @@
         }
       }
     },
+    
     "/task/{id}": {
       "put": {
         "summary": "Cập nhật công việc",
