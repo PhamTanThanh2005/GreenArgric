@@ -3,7 +3,7 @@
   "info": {
     "title": "GREEN AGRIC API",
     "version": "1.0.0",
-    "description": "Backend API & MQTT Service cho hệ thống nông nghiệp thông minh"
+    "description": "Backend API & MQTT Service cho hệ thống điều khiển môi trường nhà kính thông minh"
   },
   "servers": [
     {
